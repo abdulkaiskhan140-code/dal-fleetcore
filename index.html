@@ -1647,81 +1647,13 @@
             </div>
           </div>
 
-          <!-- PROJECT CARDS -->
+          <!-- PROJECT CARDS — dynamically rendered from FLEET -->
           <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
             padding:0 14px 8px;font-family:'IBM Plex Mono',monospace;">
             Select Project · پروجیکٹ چنیں
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px;">
-
-            <div onclick="openProjDetail('HOPPER')"
-              style="background:var(--surface);border:2px solid rgba(245,158,11,.4);border-radius:14px;
-              padding:14px;cursor:pointer;position:relative;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--yellow);"></div>
-              <div style="font-size:16px;font-weight:900;color:var(--yellow);margin-bottom:10px;">HOPPER</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--green);" id="pc-hopper-chk">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Checklists</div>
-                </div>
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--red);" id="pc-hopper-iss">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Issues</div>
-                </div>
-              </div>
-            </div>
-
-            <div onclick="openProjDetail('NAFA')"
-              style="background:var(--surface);border:2px solid rgba(99,102,241,.4);border-radius:14px;
-              padding:14px;cursor:pointer;position:relative;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6366f1;"></div>
-              <div style="font-size:16px;font-weight:900;color:#818cf8;margin-bottom:10px;">NAFA</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--green);" id="pc-nafa-chk">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Checklists</div>
-                </div>
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--red);" id="pc-nafa-iss">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Issues</div>
-                </div>
-              </div>
-            </div>
-
-            <div onclick="openProjDetail('ARASCO')"
-              style="background:var(--surface);border:2px solid rgba(16,185,129,.4);border-radius:14px;
-              padding:14px;cursor:pointer;position:relative;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);"></div>
-              <div style="font-size:16px;font-weight:900;color:var(--green);margin-bottom:10px;">ARASCO</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--green);" id="pc-arasco-chk">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Checklists</div>
-                </div>
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--red);" id="pc-arasco-iss">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Issues</div>
-                </div>
-              </div>
-            </div>
-
-            <div onclick="openProjDetail('DIJLA')"
-              style="background:var(--surface);border:2px solid rgba(236,72,153,.4);border-radius:14px;
-              padding:14px;cursor:pointer;position:relative;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#ec4899;"></div>
-              <div style="font-size:16px;font-weight:900;color:#f472b6;margin-bottom:10px;">DIJLA</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--green);" id="pc-dijla-chk">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Checklists</div>
-                </div>
-                <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-                  <div style="font-size:15px;font-weight:700;color:var(--red);" id="pc-dijla-iss">0</div>
-                  <div style="font-size:8px;color:var(--muted);">Issues</div>
-                </div>
-              </div>
-            </div>
-
+          <div id="dashProjCardsContainer" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px;">
+            <!-- Cards rendered dynamically by renderDashProjectCards() -->
           </div>
 
           <!-- FLEET ALERTS -->
@@ -1774,13 +1706,17 @@
               <!-- Daily Trend Chart -->
               <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px;">
                 <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📈 Daily Trend</div>
-                <canvas id="reportTrendChart" height="100"></canvas>
+                <div style="position:relative;height:160px;width:100%;">
+                  <canvas id="reportTrendChart"></canvas>
+                </div>
               </div>
 
               <!-- Distribution Chart -->
               <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px;">
                 <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🍩 Type Distribution</div>
-                <canvas id="reportTypeChart" height="120"></canvas>
+                <div style="position:relative;height:180px;width:100%;">
+                  <canvas id="reportTypeChart"></canvas>
+                </div>
               </div>
 
               <!-- Detailed Group List -->
@@ -1788,25 +1724,68 @@
               <div id="reportGroupList" style="margin-bottom:10px;"></div>
 
               <!-- Export Buttons -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-                <button onclick="exportReportCSV()" style="background:linear-gradient(135deg,#10b981,#34d399);color:#000;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">📥 Summary CSV</button>
-                <button onclick="exportReportDetailCSV()" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">📋 Detailed CSV</button>
+              <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px;margin-bottom:6px;">
+                <div style="font-size:10px;color:#10b981;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">📊 Excel Ready Exports</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+                  <button onclick="exportExcelChecklist()" style="background:linear-gradient(135deg,#10b981,#34d399);color:#000;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">📋 Checklist CSV</button>
+                  <button onclick="exportExcelMaintenance()" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">🔧 Maintenance CSV</button>
+                  <button onclick="exportExcelBreakdown()" style="background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">🚨 Breakdown CSV</button>
+                  <button onclick="exportExcelAccident()" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">💥 Accident CSV</button>
+                  <button onclick="exportExcelWorkshop()" style="background:linear-gradient(135deg,#a78bfa,#c4b5fd);color:#000;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">🏭 Workshop CSV</button>
+                  <button onclick="exportExcelTire()" style="background:linear-gradient(135deg,#fb923c,#fdba74);color:#000;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">🛞 Tire CSV</button>
+                  <button onclick="exportExcelOutside()" style="background:linear-gradient(135deg,#06b6d4,#67e8f9);color:#000;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">🏗️ Outside CSV</button>
+                  <button onclick="exportExcelAll()" style="background:linear-gradient(135deg,#9333ea,#a855f7);color:#fff;border:none;border-radius:7px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">📦 ALL Reports</button>
+                </div>
+                <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:4px;">Excel ready · Headers clear · Har column alag</div>
               </div>
-              <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:6px;">CSV files Excel mein open kar sakte ho · يمكن فتح الملفات في Excel</div>
+
+              <!-- Old Summary Exports -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button onclick="exportReportCSV()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:10px;font-weight:700;cursor:pointer;">📊 Summary (Group)</button>
+                <button onclick="exportReportDetailCSV()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:10px;font-weight:700;cursor:pointer;">📋 Raw Data</button>
+              </div>
             </div>
           </div>
 
-          <!-- LINKS -->
-          <div style="padding:0 12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <a href="https://docs.google.com/spreadsheets/d/1NKsJZbJB8_PerU-SsXEySYMs1X4Jt9mwX78qCtMgT0U/edit"
-              target="_blank"
-              style="background:linear-gradient(135deg,var(--green),#34d399);color:#000;
-              text-decoration:none;border-radius:10px;padding:12px;text-align:center;
-              font-size:12px;font-weight:700;">📊 Google Sheet</a>
-            <button onclick="dashExportAll()"
-              style="background:var(--surface);border:1.5px solid var(--border);color:var(--text);
-              border-radius:10px;padding:12px;font-size:12px;font-weight:700;cursor:pointer;">
-              📥 Export CSV</button>
+          <!-- ════ MASTER SHEET QUICK ACCESS ════ -->
+          <div style="padding:0 12px 14px;">
+            <div style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(52,211,153,0.05));border:1.5px solid rgba(16,185,129,0.35);border-radius:12px;padding:14px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <div style="font-size:24px;">📊</div>
+                <div style="flex:1;">
+                  <div style="font-size:14px;font-weight:800;color:#10b981;">Master Sheet · ماسٹر شیٹ</div>
+                  <div style="font-size:9px;color:var(--muted);">Google Sheets mein archive · Excel ready</div>
+                </div>
+              </div>
+
+              <!-- Open Sheet Button (BIG, prominent) -->
+              <a href="https://docs.google.com/spreadsheets/d/1NKsJZbJB8_PerU-SsXEySYMs1X4Jt9mwX78qCtMgT0U/edit"
+                target="_blank" rel="noopener"
+                style="display:block;background:linear-gradient(135deg,#10b981,#34d399);color:#000;
+                text-decoration:none;border-radius:10px;padding:14px;text-align:center;
+                font-size:13px;font-weight:800;margin-bottom:8px;box-shadow:0 4px 12px rgba(16,185,129,0.25);">
+                📂 Open Master Sheet · شیٹ کھولیں
+              </a>
+
+              <!-- Daily Workflow Helper -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">
+                <div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">⚡ Daily 2-Minute Workflow</div>
+                <div style="font-size:11px;color:var(--text);line-height:1.7;">
+                  <div>1️⃣ Scroll up → Reports section</div>
+                  <div>2️⃣ Select period (Today/Week/Month)</div>
+                  <div>3️⃣ Click <span style="color:#9333ea;font-weight:700;">📦 ALL Reports</span></div>
+                  <div>4️⃣ Open Master Sheet (button above)</div>
+                  <div>5️⃣ Open CSV in Excel → Copy → Paste in Sheet tab</div>
+                  <div style="color:#10b981;font-weight:700;margin-top:4px;">✓ Done! Archive updated</div>
+                </div>
+              </div>
+
+              <!-- Quick action buttons -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button onclick="copySheetUrl()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer;">🔗 Copy Sheet URL</button>
+                <button onclick="dashExportAll()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer;">📥 Quick CSV Export</button>
+              </div>
+            </div>
           </div>
 
         </div><!-- /dash-home -->
@@ -2443,6 +2422,15 @@
 <div class="page" id="page-setup">
   <div style="padding:13px;">
 
+    <!-- 🔓 Admin Unlocked Banner -->
+    <div style="background:linear-gradient(135deg,rgba(168,85,247,0.12),rgba(192,132,252,0.05));border:1.5px solid rgba(168,85,247,0.35);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:800;color:#c084fc;">🔓 Admin Access Unlocked</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:1px;">Auto re-lock after 15 min · صرف ایڈمن</div>
+      </div>
+      <button onclick="lockSetupTab()" style="background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.4);color:#c084fc;border-radius:7px;padding:7px 11px;font-size:11px;font-weight:700;cursor:pointer;">🔒 Lock Now</button>
+    </div>
+
     <!-- ══ FIREBASE CLOUD SETUP (RECOMMENDED) ══ -->
     <div class="gc" style="border:2px solid #f97316;background:rgba(249,115,22,.05);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -2674,7 +2662,7 @@ function initAllSheets() {
 <div class="bnav">
   <button class="bb act" onclick="switchPage('forms',this)"><span class="bi">📋</span><span class="bl">Forms</span></button>
   <button class="bb" onclick="switchPage('history',this)"><span class="bi">📁</span><span class="bl">History</span></button>
-  <button class="bb" onclick="switchPage('setup',this)"><span class="bi">⚙️</span><span class="bl">Setup</span></button>
+  <button class="bb" onclick="switchPage('setup',this)"><span class="bi">🔒</span><span class="bl">Setup</span></button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -3034,6 +3022,15 @@ function switchForm(id, tab) {
   document.querySelectorAll('.ftab').forEach(t => t.classList.remove('act'));
   document.getElementById('fpanel-' + id).classList.add('act');
   tab.classList.add('act');
+
+  // BUG FIX: Refresh content when switching to dashboard/admin
+  // This ensures new projects/trucks added in Admin show up in Dashboard immediately
+  if (id === 'dash' && typeof refreshDashboard === 'function') {
+    setTimeout(refreshDashboard, 30);
+  }
+  if (id === 'adm' && typeof admRenderAll === 'function') {
+    setTimeout(admRenderAll, 30);
+  }
 }
 
 function setPill(el, key, val) {
@@ -3524,6 +3521,12 @@ function renderHistory() {
 // ════ PAGE NAV ════
 
 function switchPage(id, btn) {
+  // 🔒 SETUP TAB LOCK — Admin password protection
+  if (id === 'setup' && !window._setupUnlocked) {
+    const unlocked = unlockSetupTab();
+    if (!unlocked) return; // wait for password — cancelled or wrong
+  }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.bb').forEach(b => b.classList.remove('act'));
   document.getElementById('page-' + id).classList.add('active');
@@ -3532,6 +3535,71 @@ function switchPage(id, btn) {
   if (id === 'setup' && typeof refreshCloudStatus === 'function') {
     setTimeout(refreshCloudStatus, 50);
   }
+}
+
+// ════════════════════════════════════════════════════════════
+// 🔒 SETUP TAB LOCK — Admin only access (password protected)
+// ════════════════════════════════════════════════════════════
+const SETUP_ADMIN_PASSWORD = 'AK1257'; // Admin code (only owner knows)
+const SETUP_UNLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes auto re-lock
+
+window._setupUnlocked = false;
+let _setupLockTimer = null;
+
+// Check if previously unlocked in this session (within 15 min)
+function _checkSetupSession() {
+  const unlockedAt = sessionStorage.getItem('dalSetupUnlockedAt');
+  if (unlockedAt) {
+    const elapsed = Date.now() - parseInt(unlockedAt, 10);
+    if (elapsed < SETUP_UNLOCK_DURATION_MS) {
+      window._setupUnlocked = true;
+      _scheduleSetupRelock(SETUP_UNLOCK_DURATION_MS - elapsed);
+      return true;
+    }
+    sessionStorage.removeItem('dalSetupUnlockedAt');
+  }
+  return false;
+}
+
+function _scheduleSetupRelock(ms) {
+  if (_setupLockTimer) clearTimeout(_setupLockTimer);
+  _setupLockTimer = setTimeout(() => {
+    window._setupUnlocked = false;
+    sessionStorage.removeItem('dalSetupUnlockedAt');
+    showToast('🔒 Setup re-locked (15 min expired)');
+  }, ms);
+}
+
+// Prompt for password
+function unlockSetupTab() {
+  // Check session first
+  if (_checkSetupSession()) return true;
+
+  const entered = prompt('🔒 Setup Tab Locked\n\nAdmin password chahiye · ایڈمن پاس ورڈ:\n(Sirf authorised admin)');
+
+  if (entered === null) return false; // Cancelled
+
+  if (entered === SETUP_ADMIN_PASSWORD) {
+    window._setupUnlocked = true;
+    sessionStorage.setItem('dalSetupUnlockedAt', String(Date.now()));
+    _scheduleSetupRelock(SETUP_UNLOCK_DURATION_MS);
+    showToast('🔓 Setup unlocked (15 min)');
+    return true;
+  } else {
+    showToast('❌ Wrong password! · غلط پاس ورڈ', true);
+    return false;
+  }
+}
+
+// Manual lock button (so admin can lock back manually if leaving phone)
+function lockSetupTab() {
+  window._setupUnlocked = false;
+  sessionStorage.removeItem('dalSetupUnlockedAt');
+  if (_setupLockTimer) { clearTimeout(_setupLockTimer); _setupLockTimer = null; }
+  showToast('🔒 Setup locked');
+  // Navigate away from setup
+  const formsBtn = document.querySelector('.bb');
+  if (formsBtn) switchPage('forms', formsBtn);
 }
 
 // ════ TOAST ════
@@ -3965,11 +4033,76 @@ function renderDashStats() {
   s('dashStat3', inWs);
   s('dashStat4', d.filter(x=>x.type==='Outside').length);
 
-  ['HOPPER','NAFA','ARASCO','DIJLA'].forEach(p => {
-    const pd = d.filter(x=>x.proj===p);
-    s('pc-'+p.toLowerCase()+'-chk', pd.filter(x=>x.type==='Checklist').length);
-    s('pc-'+p.toLowerCase()+'-iss', pd.filter(x=>['Breakdown','Accident','Maintenance'].includes(x.type)).length);
+  // Render dynamic project cards (BUG FIX: now includes new projects from Admin)
+  renderDashProjectCards();
+}
+
+// Dynamically generate project cards from FLEET + data entries
+function renderDashProjectCards() {
+  const container = document.getElementById('dashProjCardsContainer');
+  if (!container) return;
+
+  const allProjects = new Set(Object.keys(FLEET));
+  dashFiltered.forEach(x => {
+    if (x.proj && x.proj !== '—' && x.proj.trim()) allProjects.add(x.proj);
   });
+
+  const PROJECT_COLORS = {
+    'HOPPER':  { bg:'rgba(245,158,11,.4)',  bar:'var(--yellow)', text:'var(--yellow)' },
+    'NAFA':    { bg:'rgba(99,102,241,.4)',  bar:'#6366f1',        text:'#818cf8' },
+    'ARASCO':  { bg:'rgba(16,185,129,.4)',  bar:'var(--green)',   text:'var(--green)' },
+    'DIJLA':   { bg:'rgba(236,72,153,.4)',  bar:'#ec4899',        text:'#f472b6' }
+  };
+  const FALLBACK_COLORS = [
+    { bg:'rgba(168,85,247,.4)',  bar:'#a855f7', text:'#c084fc' },
+    { bg:'rgba(6,182,212,.4)',   bar:'#06b6d4', text:'#22d3ee' },
+    { bg:'rgba(251,146,60,.4)',  bar:'#fb923c', text:'#fdba74' },
+    { bg:'rgba(34,197,94,.4)',   bar:'#22c55e', text:'#86efac' },
+    { bg:'rgba(244,114,182,.4)', bar:'#f472b6', text:'#f9a8d4' },
+    { bg:'rgba(59,130,246,.4)',  bar:'#3b82f6', text:'#60a5fa' },
+    { bg:'rgba(234,179,8,.4)',   bar:'#eab308', text:'#facc15' },
+    { bg:'rgba(20,184,166,.4)',  bar:'#14b8a6', text:'#5eead4' }
+  ];
+
+  const builtIn = ['HOPPER','NAFA','ARASCO','DIJLA'];
+  const projList = [];
+  builtIn.forEach(p => { if (allProjects.has(p)) projList.push(p); });
+  Array.from(allProjects).filter(p => !builtIn.includes(p)).sort().forEach(p => projList.push(p));
+
+  let html = '';
+  let fallbackIdx = 0;
+  projList.forEach(proj => {
+    const pd = dashFiltered.filter(x => x.proj === proj);
+    const chk = pd.filter(x => x.type === 'Checklist').length;
+    const iss = pd.filter(x => ['Breakdown','Accident','Maintenance'].includes(x.type)).length;
+    const color = PROJECT_COLORS[proj] || FALLBACK_COLORS[fallbackIdx++ % FALLBACK_COLORS.length];
+    const emoji = (typeof _admProjectEmojis !== 'undefined' && _admProjectEmojis[proj]) ? _admProjectEmojis[proj] : '';
+
+    html += '<div onclick="openProjDetail(\'' + proj.replace(/'/g, "\\'") + '\')" ' +
+      'style="background:var(--surface);border:2px solid ' + color.bg + ';border-radius:14px;' +
+      'padding:14px;cursor:pointer;position:relative;overflow:hidden;">' +
+      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + color.bar + ';"></div>' +
+      '<div style="font-size:16px;font-weight:900;color:' + color.text + ';margin-bottom:10px;">' +
+        (emoji ? emoji + ' ' : '') + proj +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">' +
+        '<div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">' +
+          '<div style="font-size:15px;font-weight:700;color:var(--green);">' + chk + '</div>' +
+          '<div style="font-size:8px;color:var(--muted);">Checklists</div>' +
+        '</div>' +
+        '<div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">' +
+          '<div style="font-size:15px;font-weight:700;color:var(--red);">' + iss + '</div>' +
+          '<div style="font-size:8px;color:var(--muted);">Issues</div>' +
+        '</div>' +
+      '</div>' +
+      '</div>';
+  });
+
+  if (!projList.length) {
+    html = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:11px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;">No projects yet · Admin panel se add karo</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 function renderDashAlerts() {
@@ -4242,15 +4375,27 @@ function getReportGroupKey(entry) {
   return null;
 }
 
-// Main refresh function
+// Main refresh function — SMART: only re-render charts if data changed (prevents auto-scroll bug)
+let _lastReportSignature = '';
 function refreshReports() {
   reportData = getFilteredReportData();
   const countEl = document.getElementById('reportRecordCount');
   if (countEl) countEl.textContent = reportData.length + ' records';
+
+  // Build a signature of current data + filter state. If unchanged, skip chart re-render to prevent scroll jumps.
+  const signature = reportPeriod + '|' + reportGroup + '|' + reportCustomFrom + '|' + reportCustomTo + '|' + reportData.length + '|' + reportData.map(h => (h.time||'') + (h.type||'')).join(';');
+  const changed = signature !== _lastReportSignature;
+
+  // Stats and group list update always (they're cheap, no scroll impact)
   renderReportStats();
-  renderReportTrend();
-  renderReportTypeChart();
   renderReportGroupList();
+
+  // Charts only re-render if data actually changed (prevents auto-scroll on auto-refresh)
+  if (changed) {
+    renderReportTrend();
+    renderReportTypeChart();
+    _lastReportSignature = signature;
+  }
 }
 
 // Summary stat cards
@@ -4282,12 +4427,12 @@ function statCard(icon, label, count, color) {
        + '</div>';
 }
 
-// Daily trend chart (line)
+// Daily trend chart (line/bar with zero-fill)
 function renderReportTrend() {
   const canvas = document.getElementById('reportTrendChart');
   if (!canvas || typeof Chart === 'undefined') return;
 
-  // Group by date
+  // Group by date (DD/MM/YYYY string)
   const byDate = {};
   reportData.forEach(h => {
     const d = tsDate(h.time);
@@ -4295,40 +4440,105 @@ function renderReportTrend() {
     const key = saDate(d);
     byDate[key] = (byDate[key] || 0) + 1;
   });
-  // Sort dates ASC
-  const dates = Object.keys(byDate).sort((a,b) => {
-    const [da,ma,ya] = a.split('/').map(Number);
-    const [db,mb,yb] = b.split('/').map(Number);
-    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
-  });
-  const counts = dates.map(d => byDate[d]);
-  // Shorter labels (DD/MM)
-  const labels = dates.map(d => d.substring(0,5));
+
+  // Determine date range (fill zeros for missing days)
+  let rangeStart, rangeEnd;
+  const now = new Date();
+  if (reportPeriod === 'today') {
+    rangeStart = new Date(now); rangeStart.setHours(0,0,0,0);
+    rangeEnd = new Date(now); rangeEnd.setHours(23,59,59,999);
+  } else if (reportPeriod === 'yesterday') {
+    rangeStart = new Date(now); rangeStart.setDate(rangeStart.getDate()-1); rangeStart.setHours(0,0,0,0);
+    rangeEnd = new Date(rangeStart); rangeEnd.setHours(23,59,59,999);
+  } else if (reportPeriod === 'week') {
+    rangeStart = new Date(now); rangeStart.setDate(rangeStart.getDate()-6); rangeStart.setHours(0,0,0,0);
+    rangeEnd = new Date(now); rangeEnd.setHours(23,59,59,999);
+  } else if (reportPeriod === 'month') {
+    rangeStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    rangeEnd = new Date(now.getFullYear(), now.getMonth()+1, 0); rangeEnd.setHours(23,59,59,999);
+  } else if (reportPeriod === 'custom' && reportCustomFrom && reportCustomTo) {
+    rangeStart = new Date(reportCustomFrom); rangeStart.setHours(0,0,0,0);
+    rangeEnd = new Date(reportCustomTo); rangeEnd.setHours(23,59,59,999);
+  } else {
+    // 'all' — use min/max date from data, fallback to last 7 days
+    const dataDates = Object.keys(byDate).map(d => {
+      const [dd,mm,yy] = d.split('/').map(Number);
+      return new Date(yy, mm-1, dd);
+    });
+    if (dataDates.length) {
+      rangeStart = new Date(Math.min(...dataDates));
+      rangeEnd = new Date(Math.max(...dataDates));
+    } else {
+      rangeStart = new Date(now); rangeStart.setDate(rangeStart.getDate()-6);
+      rangeEnd = new Date(now);
+    }
+  }
+
+  // Build full date list (zero-fill)
+  const labels = [];
+  const counts = [];
+  const dayCursor = new Date(rangeStart);
+  let safetyCounter = 0;
+  while (dayCursor <= rangeEnd && safetyCounter < 366) {
+    const key = saDate(dayCursor);
+    labels.push(key.substring(0,5)); // DD/MM
+    counts.push(byDate[key] || 0);
+    dayCursor.setDate(dayCursor.getDate()+1);
+    safetyCounter++;
+  }
+
+  // If only 1 day in range OR all values are zero, use a bar chart (cleaner visual)
+  const isSinglePoint = labels.length === 1;
+  const allZero = counts.every(c => c === 0);
+  const chartType = (isSinglePoint || allZero) ? 'bar' : 'line';
 
   if (reportTrendChartInstance) reportTrendChartInstance.destroy();
+
+  const datasetCommon = {
+    label: 'Entries',
+    data: counts,
+    backgroundColor: chartType === 'bar' ? 'rgba(167,139,250,0.65)' : 'rgba(167,139,250,0.15)',
+    borderColor: '#a78bfa',
+    borderWidth: 2
+  };
+  if (chartType === 'line') {
+    datasetCommon.fill = true;
+    datasetCommon.tension = 0.3;
+    datasetCommon.pointRadius = 4;
+    datasetCommon.pointBackgroundColor = '#a78bfa';
+    datasetCommon.pointBorderColor = '#fff';
+    datasetCommon.pointBorderWidth = 1;
+  } else {
+    datasetCommon.borderRadius = 4;
+    datasetCommon.maxBarThickness = 40;
+  }
+
   reportTrendChartInstance = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Entries',
-        data: counts,
-        borderColor: '#a78bfa',
-        backgroundColor: 'rgba(167,139,250,0.15)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: 3,
-        pointBackgroundColor: '#a78bfa'
-      }]
-    },
+    type: chartType,
+    data: { labels: labels, datasets: [datasetCommon] },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => 'Date: ' + items[0].label,
+            label: (item) => item.parsed.y + ' entries'
+          }
+        }
+      },
       scales: {
-        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(148,163,184,0.1)' } },
-        y: { beginAtZero: true, ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { color: 'rgba(148,163,184,0.1)' } }
+        x: {
+          ticks: { color: '#94a3b8', font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 },
+          grid: { color: 'rgba(148,163,184,0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0, stepSize: 1 },
+          grid: { color: 'rgba(148,163,184,0.08)' }
+        }
       }
     }
   });
@@ -4453,6 +4663,288 @@ function downloadCSV(csv, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   showToast('📥 Exported! Excel mein khole.');
+}
+
+// ════════════════════════════════════════════════════════════
+// 📊 EXCEL-READY EXPORTS — Har sheet ke proper headers ke saath
+// Manager ko clear samajh aaye kya OK, kya issue, kya action
+// ════════════════════════════════════════════════════════════
+
+// Helper: pad row to ensure exact length
+function _pad(arr, n) {
+  const out = (arr || []).slice(0, n);
+  while (out.length < n) out.push('');
+  return out;
+}
+
+// Helper: build CSV from header + rows
+function _buildCSV(headers, rows) {
+  const all = [headers].concat(rows);
+  return all.map(r => r.map(c => {
+    const s = (c === null || c === undefined) ? '' : String(c);
+    return '"' + s.replace(/"/g, '""') + '"';
+  }).join(',')).join('\n');
+}
+
+// Helper: get filename suffix from current filter
+function _fileSuffix() {
+  const date = new Date().toISOString().split('T')[0];
+  return reportPeriod + '_' + date;
+}
+
+// Helper: status reader for Checklist (returns "✓ OK" / "✗ Not OK" / "—")
+function _ck(val) {
+  if (val === 'OK' || val === '✓' || val === 'ok') return '✓ OK';
+  if (val === 'NotOK' || val === 'NOT OK' || val === 'NOTOK' || val === '✗' || val === 'NO' || val === 'No') return '✗ Not OK';
+  if (val && val !== '—' && val !== '') return String(val);
+  return '—';
+}
+
+// ─────────────────────────────────────────
+// 1. CHECKLIST CSV (Driver — daily pre/post-trip)
+// ─────────────────────────────────────────
+function exportExcelChecklist() {
+  const data = reportData.filter(h => h.type === 'Checklist');
+  if (!data.length) { showToast('❌ No Checklist data!', true); return; }
+
+  const headers = [
+    'Date','Time','Project','Truck','Trailer','Driver','Trip Type','KM Start','KM End',
+    'Belts/Hoses','Engine Oil','Brake Fluid','Hydraulic Oil','Coolant','Leaks',
+    'Temp Gauge','Oil Gauge','Fuel','Air Pressure',
+    'Head Lamp','Turn Signals','Brake Lights','Side Lights','Hazard','Revolving Light','Boom Light',
+    'Seat','Seatbelt','Doors','Windows','Wipers','Horn','Pedals','Reverse Alarm','Battery',
+    'Clean Cab','5th Wheel','Locking','Boom Grease','Cone','Fire Ext','Barrier','Chock',
+    'Reg Plate','Docs','Uniform','Tires','Spare','Tire Pressure Data','Notes','Overall Status'
+  ];
+
+  const rows = data.map(h => {
+    const r = h.row || [];
+    // Row indices (0-based, after timestamp prepended by Apps Script):
+    // 0:Proj, 1:Truck, 2:Trailer, 3:Driver, 4:TripType, 5:KM_Start, 6:KM_End,
+    // 7:Belts, 8:Oil, 9:Brake, 10:Hydraulic, 11:Coolant, 12:Leaks,
+    // 13:Temp, 14:OilGauge, 15:Fuel, 16:Air,
+    // 17:Headlamp, 18:Signal, 19:BrakeLights, 20:SideLights, 21:Hazard, 22:Revolving, 23:Boom,
+    // 24:Seat, 25:Seatbelt, 26:Doors, 27:Windows, 28:Wipers, 29:Horn, 30:Pedals, 31:Reversa, 32:Battery,
+    // 33:Clean, 34:5thWheel, 35:Locking, 36:BoomGrease, 37:Cone, 38:FireExt, 39:Barrier, 40:Chock,
+    // 41:RegPlate, 42:Docs, 43:Uniform, 44:Tires, 45:Spare, 46:TireData, 47:Notes
+    const [datePart, timePart] = (h.time || '').split(',').map(s => (s||'').trim());
+
+    // Calculate overall status (count not-OK)
+    const checkIdx = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45];
+    let issues = 0;
+    checkIdx.forEach(i => {
+      const v = (r[i]||'').toString().toUpperCase();
+      if (v.includes('NOTOK') || v.includes('NOT OK') || v === 'NO') issues++;
+    });
+    const status = issues === 0 ? '✓ All OK' : '⚠ ' + issues + ' issues';
+
+    return [
+      datePart || (h.time||''), timePart || '',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'', r[4]||'', r[5]||'', r[6]||'',
+      _ck(r[7]), _ck(r[8]), _ck(r[9]), _ck(r[10]), _ck(r[11]), _ck(r[12]),
+      _ck(r[13]), _ck(r[14]), _ck(r[15]), _ck(r[16]),
+      _ck(r[17]), _ck(r[18]), _ck(r[19]), _ck(r[20]), _ck(r[21]), _ck(r[22]), _ck(r[23]),
+      _ck(r[24]), _ck(r[25]), _ck(r[26]), _ck(r[27]), _ck(r[28]), _ck(r[29]), _ck(r[30]), _ck(r[31]), _ck(r[32]),
+      _ck(r[33]), _ck(r[34]), _ck(r[35]), _ck(r[36]), _ck(r[37]), _ck(r[38]), _ck(r[39]), _ck(r[40]),
+      _ck(r[41]), _ck(r[42]), _ck(r[43]), _ck(r[44]), _ck(r[45]),
+      r[46]||'', r[47]||'', status
+    ];
+  });
+
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Checklist_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 2. MAINTENANCE CSV (Driver — repair requests)
+// ─────────────────────────────────────────
+function exportExcelMaintenance() {
+  const data = reportData.filter(h => h.type === 'Maintenance');
+  if (!data.length) { showToast('❌ No Maintenance data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Problem Type','Priority','Description','Location'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'', r[7]||''
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Maintenance_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 3. BREAKDOWN CSV (Driver — emergency log)
+// ─────────────────────────────────────────
+function exportExcelBreakdown() {
+  const data = reportData.filter(h => h.type === 'Breakdown');
+  if (!data.length) { showToast('❌ No Breakdown data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Breakdown Type','Location','Blocking Traffic','Description'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'', r[7]||''
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Breakdown_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 4. ACCIDENT CSV (Driver — insurance/Najm)
+// ─────────────────────────────────────────
+function exportExcelAccident() {
+  const data = reportData.filter(h => h.type === 'Accident');
+  if (!data.length) { showToast('❌ No Accident data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Accident Type','Location','Najm Case No','Najm Link','Other Vehicle','Injuries','Description'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'', r[7]||'',
+      r[8]||'', r[9]||'', r[10]||''
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Accident_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 5. WORKSHOP CSV (Foreman — repair tracking + inspection)
+// ─────────────────────────────────────────
+function exportExcelWorkshop() {
+  const data = reportData.filter(h => h.type === 'Workshop');
+  if (!data.length) { showToast('❌ No Workshop data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Action','Mechanic / Foreman','Notes','Inspection Summary'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    // Inspection summary is field index 7 (or last if not present)
+    const inspection = r[7] || '';
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'',
+      inspection
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Workshop_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 6. TIRE CSV (Tireman — tire change log)
+// ─────────────────────────────────────────
+function exportExcelTire() {
+  const data = reportData.filter(h => h.type === 'Tire' || h.type === 'TireRequest');
+  if (!data.length) { showToast('❌ No Tire data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Change Date','KM Reading','Position','Old Serial','Old Size','Old Brand','Old Months','New Serial','New Size','New Brand','Reason','Location','Requested By','Notes'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'', r[7]||'', r[8]||'', r[9]||'',
+      r[10]||'', r[11]||'', r[12]||'', r[13]||'',
+      r[14]||'', r[15]||'', r[16]||'', r[17]||''
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_Tire_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 7. OUTSIDE REPAIR CSV (Supervisor — vendor repairs)
+// ─────────────────────────────────────────
+function exportExcelOutside() {
+  const data = reportData.filter(h => h.type === 'OutsideRepair' || h.type === 'Outside' || h.type === 'JobCard');
+  if (!data.length) { showToast('❌ No Outside Repair data!', true); return; }
+
+  const headers = ['Date','Time','Project','Truck','Trailer','Driver','Job Card No','Send Date','Odometer','Workshop Name','City','Repair Type','Description','Cost (SAR)','Expected Return'];
+  const rows = data.map(h => {
+    const r = h.row || [];
+    const [datePart, timePart] = (h.time||'').split(',').map(s => (s||'').trim());
+    return [
+      datePart||(h.time||''), timePart||'',
+      r[0]||'', r[1]||'', r[2]||'', r[3]||'',
+      r[4]||'', r[5]||'', r[6]||'', r[7]||'',
+      r[8]||'', r[9]||'', r[10]||'', r[11]||'', r[12]||''
+    ];
+  });
+  downloadCSV(_buildCSV(headers, rows), 'DAL_OutsideRepair_' + _fileSuffix());
+}
+
+// ─────────────────────────────────────────
+// 8. EXPORT ALL — sequential downloads
+// ─────────────────────────────────────────
+function exportExcelAll() {
+  if (!reportData.length) { showToast('❌ No data!', true); return; }
+
+  const exporters = [
+    {name: 'Checklist',    fn: exportExcelChecklist,    check: () => reportData.some(h => h.type === 'Checklist')},
+    {name: 'Maintenance',  fn: exportExcelMaintenance,  check: () => reportData.some(h => h.type === 'Maintenance')},
+    {name: 'Breakdown',    fn: exportExcelBreakdown,    check: () => reportData.some(h => h.type === 'Breakdown')},
+    {name: 'Accident',     fn: exportExcelAccident,     check: () => reportData.some(h => h.type === 'Accident')},
+    {name: 'Workshop',     fn: exportExcelWorkshop,     check: () => reportData.some(h => h.type === 'Workshop')},
+    {name: 'Tire',         fn: exportExcelTire,         check: () => reportData.some(h => h.type === 'Tire' || h.type === 'TireRequest')},
+    {name: 'Outside',      fn: exportExcelOutside,      check: () => reportData.some(h => h.type === 'OutsideRepair' || h.type === 'Outside' || h.type === 'JobCard')}
+  ];
+
+  const available = exporters.filter(e => e.check());
+  if (!available.length) { showToast('❌ No data to export!', true); return; }
+
+  showToast('📦 Downloading ' + available.length + ' reports...');
+
+  // Sequential downloads with 800ms gap (browser blocks rapid downloads otherwise)
+  let i = 0;
+  function next() {
+    if (i >= available.length) {
+      showToast('✅ All ' + available.length + ' reports downloaded!');
+      return;
+    }
+    available[i].fn();
+    i++;
+    setTimeout(next, 900);
+  }
+  next();
+}
+
+// ─────────────────────────────────────────
+// COPY MASTER SHEET URL TO CLIPBOARD
+// ─────────────────────────────────────────
+function copySheetUrl() {
+  const url = 'https://docs.google.com/spreadsheets/d/1NKsJZbJB8_PerU-SsXEySYMs1X4Jt9mwX78qCtMgT0U/edit';
+  // Try clipboard API first (modern)
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('🔗 Sheet URL copied! WhatsApp/Email pe paste karo.');
+    }).catch(() => fallbackCopy(url));
+  } else {
+    fallbackCopy(url);
+  }
+}
+function fallbackCopy(text) {
+  // Fallback for older browsers
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('🔗 Sheet URL copied!');
+  } catch (e) {
+    showToast('❌ Copy failed. Manually copy from address bar.', true);
+  }
+  document.body.removeChild(ta);
 }
 
 
@@ -4799,62 +5291,84 @@ function copyCode() {
 
 const ADM_KEY = 'dalAdminFleet';
 
+// Internal state for tracking deletions (persisted)
+let _admDeletedProjects = [];
+let _admDeletedTrailers = [];
+let _admProjectEmojis = {}; // project -> emoji map
+
 // Load fleet data — merge hardcoded with admin edits from localStorage
 function admLoadFleet() {
   const saved = localStorage.getItem(ADM_KEY);
   if(saved) {
     try {
       const parsed = JSON.parse(saved);
-      // Merge saved data into FLEET
-      Object.keys(parsed.fleet || {}).forEach(proj => {
-        FLEET[proj] = parsed.fleet[proj];
-      });
-      // Restore deleted projects
-      Object.keys(FLEET).forEach(proj => {
-        if(parsed.deletedProjects && parsed.deletedProjects.includes(proj)) {
-          delete FLEET[proj];
-        }
-      });
-      // Add new projects
-      (parsed.newProjects || []).forEach(p => {
-        if(!FLEET[p.name]) FLEET[p.name] = [];
-      });
-      // Restore trailer list
-      if(parsed.trailers) {
-        parsed.trailers.forEach(t => { if(!TRAILERS.includes(t)) TRAILERS.push(t); });
-        (parsed.deletedTrailers || []).forEach(t => {
-          const i = TRAILERS.indexOf(t); if(i>-1) TRAILERS.splice(i,1);
+      // Restore custom fleet (merge — saved overrides defaults)
+      if (parsed.fleet) {
+        Object.keys(parsed.fleet).forEach(proj => {
+          FLEET[proj] = parsed.fleet[proj];
         });
       }
-    } catch(e) {}
+      // Apply deletions
+      _admDeletedProjects = parsed.deletedProjects || [];
+      _admDeletedProjects.forEach(p => { delete FLEET[p]; });
+      // Add new projects (already merged via fleet, but ensure they exist)
+      (parsed.newProjects || []).forEach(p => {
+        if(!FLEET[p.name] && !_admDeletedProjects.includes(p.name)) {
+          FLEET[p.name] = [];
+        }
+      });
+      // Restore trailer list
+      if(parsed.trailers && Array.isArray(parsed.trailers)) {
+        parsed.trailers.forEach(t => { if(t && !TRAILERS.includes(t)) TRAILERS.push(t); });
+      }
+      _admDeletedTrailers = parsed.deletedTrailers || [];
+      _admDeletedTrailers.forEach(t => {
+        const i = TRAILERS.indexOf(t);
+        if(i > -1) TRAILERS.splice(i, 1);
+      });
+      // Restore emojis
+      _admProjectEmojis = parsed.projectEmojis || {};
+    } catch(e) {
+      console.warn('[admin] Load error:', e);
+    }
   }
 }
 
 function admSaveFleet() {
   const data = {
     fleet: JSON.parse(JSON.stringify(FLEET)),
-    trailers: [...TRAILERS],
-    deletedProjects: [],
-    deletedTrailers: [],
-    newProjects: Object.keys(FLEET).map(n=>({name:n}))
+    trailers: TRAILERS.filter(t => t && !t.startsWith('—')),
+    deletedProjects: _admDeletedProjects,
+    deletedTrailers: _admDeletedTrailers,
+    newProjects: Object.keys(FLEET).map(n=>({name:n})),
+    projectEmojis: _admProjectEmojis,
+    savedAt: Date.now()
   };
-  localStorage.setItem(ADM_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(ADM_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.warn('[admin] Save error:', e);
+    showToast('⚠️ Save failed — storage full?', true);
+    return;
+  }
   rebuildProjectDropdown();
-  // Sync FLEET_DATA to Google Sheets
+  // BUG FIX: Also refresh dashboard cards if they exist (covers Manager view scenario)
+  if (typeof renderDashProjectCards === 'function') {
+    renderDashProjectCards();
+  }
+  // Sync FLEET_DATA to Google Sheets (if connected)
   admSyncToSheets();
 }
 
 async function admSyncToSheets() {
   if(!sheetsUrl) return;
   try {
-    // Build flat rows for FLEET_DATA sheet
     const rows = [];
     Object.keys(FLEET).forEach(proj => {
       (FLEET[proj]||[]).forEach(t => {
         rows.push([proj, t.plate||'', t.trailer||'', t.driver||'', t.make||'', t.type||'']);
       });
     });
-    // Also send trailers list
     const trailerRows = TRAILERS.filter(t=>t&&!t.startsWith('—')).map(t=>([t]));
     await fetch(sheetsUrl, {
       method:'POST',
@@ -4867,17 +5381,17 @@ async function admSyncToSheets() {
       headers:{'Content-Type':'application/json'}
     });
   } catch(e) {
-    // Silent fail — data already in localStorage
+    // Silent — local data is authoritative
   }
 }
 
 async function admLoadFromSheets() {
-  if(!sheetsUrl) return;
+  if(!sheetsUrl) { showToast('⚠️ Sheet URL not connected', true); return; }
   try {
     const r = await fetch(sheetsUrl + '?action=fleet', {mode:'cors'});
     const txt = await r.text();
     let j;
-    try { j = JSON.parse(txt); } catch(e) { return; } // Not JSON = script doesn't support GET fleet yet
+    try { j = JSON.parse(txt); } catch(e) { showToast('⚠️ Sheet response not valid', true); return; }
     if(j && j.status==='ok' && j.fleet) {
       Object.keys(j.fleet).forEach(proj => { FLEET[proj] = j.fleet[proj]; });
       if(j.trailers) {
@@ -4887,38 +5401,43 @@ async function admLoadFromSheets() {
       admRenderAll();
       showToast('✅ Fleet data loaded from Google Sheets!');
     }
-    // If status is not ok, silently use local data — no error toast
   } catch(e) {
-    // Network error — silently use local data, no error shown on load
+    showToast('⚠️ Could not load from Sheet', true);
   }
 }
 
-// Rebuild the main Project dropdown from current FLEET keys
+// Rebuild ALL project-related dropdowns from current FLEET keys
 function rebuildProjectDropdown() {
+  // Main form dropdown
   const dd = document.getElementById('ddProj');
-  if(!dd) return;
-  const cur = dd.value;
-  dd.innerHTML = '<option value="">-- Project Chunna · اختر المشروع --</option>';
-  Object.keys(FLEET).forEach(proj => {
-    const opt = document.createElement('option');
-    opt.value = proj;
-    opt.textContent = proj;
-    dd.appendChild(opt);
-  });
-  if(cur && FLEET[cur]) dd.value = cur;
-  // Also refresh admin project selects
+  if(dd) {
+    const cur = dd.value;
+    dd.innerHTML = '<option value="">-- Project Chunna · اختر المشروع --</option>';
+    Object.keys(FLEET).forEach(proj => {
+      const opt = document.createElement('option');
+      opt.value = proj;
+      const emoji = _admProjectEmojis[proj] || '🏗️';
+      opt.textContent = emoji + ' ' + proj;
+      dd.appendChild(opt);
+    });
+    if(cur && FLEET[cur]) dd.value = cur;
+  }
+
+  // Admin sub-tab project selects (FIX: include aTR-proj too)
   ['aT-proj','aD-proj','aTR-proj','aT-filterProj'].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
     const cv = el.value;
-    el.innerHTML = id === 'aT-filterProj'
-      ? '<option value="">All Projects</option>'
-      : '<option value="">Project</option>';
+    const placeholder = (id === 'aT-filterProj') ? 'All Projects'
+                      : (id === 'aTR-proj') ? 'Project (optional)'
+                      : 'Project';
+    el.innerHTML = '<option value="">' + placeholder + '</option>';
     Object.keys(FLEET).forEach(proj => {
       const o = document.createElement('option');
-      o.value = proj; o.textContent = proj; el.appendChild(o);
+      o.value = proj; o.textContent = proj;
+      el.appendChild(o);
     });
-    if(cv) el.value = cv;
+    if(cv && FLEET[cv]) el.value = cv;
   });
 }
 
@@ -4928,15 +5447,15 @@ function admSwitch(view, el) {
   document.querySelectorAll('.adm-view').forEach(v=>v.classList.remove('act'));
   el.classList.add('act');
   document.getElementById('adm-'+view).classList.add('act');
-  admRenderAll();
+  admRenderAll(); // Ensure latest data shown
 }
 
 function admRenderAll() {
+  rebuildProjectDropdown(); // FIX: rebuild dropdowns FIRST so they're populated
   admRenderTrucks();
   admRenderDrivers();
   admRenderTrailers();
   admRenderProjects();
-  rebuildProjectDropdown();
 }
 
 // ── TRUCKS ──
@@ -4953,10 +5472,14 @@ function admRenderTrucks() {
       html += '<div class="adm-item">' +
         '<div class="adm-item-ico">🚛</div>' +
         '<div class="adm-item-info">' +
-          '<div class="adm-item-main">' + t.plate + '</div>' +
+          '<div class="adm-item-main">' + (t.plate||'—') + '</div>' +
           '<div class="adm-item-sub">' + (t.make||'—') + ' · ' + (t.type||'—') + ' · 👤 ' + (t.driver||'—') + '</div>' +
-          '<div style="margin-top:3px;"><span class="adm-proj-badge">' + proj + '</span></div>' +
+          '<div style="margin-top:3px;display:flex;gap:4px;align-items:center;flex-wrap:wrap;">' +
+            '<span class="adm-proj-badge">' + proj + '</span>' +
+            (t.trailer && t.trailer !== '—' ? '<span class="adm-proj-badge" style="background:rgba(34,211,238,0.15);color:#22d3ee;">🔗 ' + t.trailer + '</span>' : '') +
+          '</div>' +
         '</div>' +
+        '<button class="adm-del" onclick="admEditTruck(\'' + proj + '\',' + i + ')" style="background:rgba(168,85,247,0.15);color:#c084fc;margin-right:4px;">✎</button>' +
         '<button class="adm-del" onclick="admDelTruck(\'' + proj + '\',' + i + ')">✕</button>' +
       '</div>';
     });
@@ -4974,22 +5497,91 @@ function admAddTruck() {
   const type    = document.getElementById('aT-type').value;
   const trailer = (document.getElementById('aT-trailer').value||'').trim().toUpperCase() || '—';
   const driver  = (document.getElementById('aT-driver').value||'').trim().toUpperCase();
-  if(!plate || !proj) { showToast(L.errPlateProj, true); return; }
+
+  // VALIDATION
+  if(!plate) { showToast('❌ Plate number zaroori hai', true); return; }
+  if(!proj)  { showToast('❌ Project select karo', true); return; }
   if(!FLEET[proj]) FLEET[proj] = [];
-  FLEET[proj].push({plate, trailer, driver, make, type});
+
+  // FIX: Check for duplicate plate across ALL projects
+  let duplicateIn = null;
+  Object.keys(FLEET).forEach(p => {
+    (FLEET[p]||[]).forEach(t => {
+      if (t.plate === plate) duplicateIn = p;
+    });
+  });
+  if (duplicateIn) {
+    showToast('❌ Plate "' + plate + '" already exists in ' + duplicateIn, true);
+    return;
+  }
+
+  // Add truck
+  FLEET[proj].push({plate, trailer, driver: driver || '—', make: make || '—', type: type || 'Dump'});
+
+  // Add trailer to global list if new
+  if (trailer !== '—' && !TRAILERS.includes(trailer)) {
+    TRAILERS.push(trailer);
+  }
+
   admSaveFleet();
-  admRenderTrucks();
-  ['aT-plate','aT-make','aT-trailer','aT-driver'].forEach(id => document.getElementById(id).value='');
-  showToast(L.okTruck);
+  admRenderAll(); // FIX: render all (not just trucks) so dropdowns/counts update
+  ['aT-plate','aT-make','aT-trailer','aT-driver'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  showToast('✅ Truck added: ' + plate);
+}
+
+// FIX: NEW — Edit truck function
+function admEditTruck(proj, idx) {
+  const t = FLEET[proj] && FLEET[proj][idx];
+  if (!t) { showToast('❌ Truck not found', true); return; }
+
+  const newPlate = prompt('Plate Number:', t.plate || '');
+  if (newPlate === null) return; // cancelled
+  const newDriver = prompt('Driver Name:', t.driver || '');
+  if (newDriver === null) return;
+  const newTrailer = prompt('Trailer No:', t.trailer || '');
+  if (newTrailer === null) return;
+  const newMake = prompt('Make & Year:', t.make || '');
+  if (newMake === null) return;
+
+  // Validate plate uniqueness if changed
+  const upperPlate = (newPlate || '').trim().toUpperCase();
+  if (upperPlate !== t.plate) {
+    let dup = null;
+    Object.keys(FLEET).forEach(p => {
+      (FLEET[p]||[]).forEach((tr, i) => {
+        if (tr.plate === upperPlate && !(p === proj && i === idx)) dup = p;
+      });
+    });
+    if (dup) { showToast('❌ Plate already exists in ' + dup, true); return; }
+  }
+
+  t.plate   = upperPlate || t.plate;
+  t.driver  = (newDriver || '').trim().toUpperCase() || '—';
+  t.trailer = (newTrailer || '').trim().toUpperCase() || '—';
+  t.make    = (newMake || '').trim().toUpperCase() || '—';
+
+  // Add trailer to global list if new
+  if (t.trailer !== '—' && !TRAILERS.includes(t.trailer)) {
+    TRAILERS.push(t.trailer);
+  }
+
+  admSaveFleet();
+  admRenderAll();
+  showToast('✅ Truck updated');
 }
 
 function admDelTruck(proj, idx) {
   const L = LANGS[currentLang];
-  if(!confirm(L.confirmTruck)) return;
+  const t = FLEET[proj] && FLEET[proj][idx];
+  if (!t) return;
+  if(!confirm('Truck "' + t.plate + '" delete? · حذف؟')) return;
   FLEET[proj].splice(idx, 1);
   admSaveFleet();
-  admRenderTrucks();
-  showToast(L.delTruck);
+  admRenderAll();
+  showToast('🗑️ Truck deleted: ' + t.plate);
 }
 
 // ── DRIVERS ──
@@ -5008,7 +5600,7 @@ function admRenderDrivers() {
         '<div class="adm-item-ico">👤</div>' +
         '<div class="adm-item-info">' +
           '<div class="adm-item-main">' + t.driver + '</div>' +
-          '<div class="adm-item-sub">🚛 ' + t.plate + ' · <span class="adm-proj-badge">' + proj + '</span></div>' +
+          '<div class="adm-item-sub">🚛 ' + (t.plate||'—') + ' · <span class="adm-proj-badge">' + proj + '</span></div>' +
         '</div>' +
         '<button class="adm-del" onclick="admDelDriver(\'' + proj + '\',' + i + ')">✕</button>' +
       '</div>';
@@ -5024,29 +5616,57 @@ function admAddDriver() {
   const name  = (document.getElementById('aD-name').value||'').trim().toUpperCase();
   const plate = (document.getElementById('aD-plate').value||'').trim().toUpperCase();
   const proj  = document.getElementById('aD-proj').value;
-  if(!name) { showToast(L.errDrvName, true); return; }
-  if(proj && FLEET[proj]) {
-    const truck = plate ? FLEET[proj].find(t=>t.plate===plate) : null;
-    if(truck) { truck.driver = name; }
-    else { FLEET[proj].push({plate: plate||'—', trailer:'—', driver:name, make:'—', type:'—'}); }
+
+  if(!name) { showToast('❌ Driver name zaroori hai', true); return; }
+
+  // FIX: If plate provided, find existing truck and update driver
+  if (plate) {
+    let found = false;
+    Object.keys(FLEET).forEach(p => {
+      (FLEET[p]||[]).forEach(t => {
+        if (t.plate === plate) { t.driver = name; found = true; }
+      });
+    });
+    if (!found) {
+      // Plate not found — create new truck with this driver
+      const targetProj = proj && FLEET[proj] ? proj : Object.keys(FLEET)[0];
+      if (!targetProj) { showToast('❌ No project exists — add project first!', true); return; }
+      FLEET[targetProj].push({plate, trailer:'—', driver:name, make:'—', type:'Dump'});
+      showToast('✅ New truck + driver added to ' + targetProj);
+    } else {
+      showToast('✅ Driver "' + name + '" assigned to ' + plate);
+    }
+  } else if (proj && FLEET[proj]) {
+    // No plate — add as standalone driver in project
+    FLEET[proj].push({plate:'—', trailer:'—', driver:name, make:'—', type:'Dump'});
+    showToast('✅ Driver "' + name + '" added to ' + proj);
   } else {
-    const firstProj = Object.keys(FLEET)[0];
-    if(firstProj) FLEET[firstProj].push({plate: plate||'—', trailer:'—', driver:name, make:'—', type:'—'});
+    showToast('❌ Plate ya Project me se ek zaroori hai', true);
+    return;
   }
+
   admSaveFleet();
-  admRenderDrivers();
-  admRenderTrucks();
-  ['aD-name','aD-plate'].forEach(id => document.getElementById(id).value='');
-  showToast(L.okDriver);
+  admRenderAll();
+  ['aD-name','aD-plate'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
 }
 
 function admDelDriver(proj, idx) {
   const L = LANGS[currentLang];
-  if(!confirm(L.confirmDrv)) return;
-  FLEET[proj][idx].driver = '—';
+  const t = FLEET[proj] && FLEET[proj][idx];
+  if (!t) return;
+  if(!confirm('Driver "' + t.driver + '" remove? · حذف؟')) return;
+  // If truck has no plate, remove the row entirely; else just clear driver
+  if (!t.plate || t.plate === '—') {
+    FLEET[proj].splice(idx, 1);
+  } else {
+    t.driver = '—';
+  }
   admSaveFleet();
-  admRenderDrivers();
-  showToast(L.delDriver);
+  admRenderAll();
+  showToast('🗑️ Driver removed');
 }
 
 // ── TRAILERS ──
@@ -5057,9 +5677,19 @@ function admRenderTrailers() {
   let html = '';
   TRAILERS.forEach((t,i) => {
     if(!t || t.startsWith('—')) return;
+    // Find which truck uses this trailer
+    let assigned = '';
+    Object.keys(FLEET).forEach(p => {
+      (FLEET[p]||[]).forEach(tr => {
+        if (tr.trailer === t) assigned = tr.plate + ' (' + p + ')';
+      });
+    });
     html += '<div class="adm-item">' +
       '<div class="adm-item-ico">🔗</div>' +
-      '<div class="adm-item-info"><div class="adm-item-main">' + t + '</div></div>' +
+      '<div class="adm-item-info">' +
+        '<div class="adm-item-main">' + t + '</div>' +
+        (assigned ? '<div class="adm-item-sub">Assigned: ' + assigned + '</div>' : '<div class="adm-item-sub" style="color:#fb923c;">Unassigned · غير مخصص</div>') +
+      '</div>' +
       '<button class="adm-del" onclick="admDelTrailer(' + i + ')">✕</button>' +
     '</div>';
   });
@@ -5071,22 +5701,28 @@ function admRenderTrailers() {
 function admAddTrailer() {
   const L = LANGS[currentLang];
   const no = (document.getElementById('aTR-no').value||'').trim().toUpperCase();
-  if(!no) { showToast(L.errTrlNo, true); return; }
-  if(TRAILERS.includes(no)) { showToast(L.errTrlDup, true); return; }
+  if(!no) { showToast('❌ Trailer number zaroori hai', true); return; }
+  if(TRAILERS.includes(no)) { showToast('❌ Trailer "' + no + '" already exists', true); return; }
   TRAILERS.push(no);
+  // Remove from deleted list if was there
+  const di = _admDeletedTrailers.indexOf(no);
+  if (di > -1) _admDeletedTrailers.splice(di, 1);
   admSaveFleet();
-  admRenderTrailers();
+  admRenderAll();
   document.getElementById('aTR-no').value='';
-  showToast(L.okTrailer);
+  showToast('✅ Trailer added: ' + no);
 }
 
 function admDelTrailer(idx) {
   const L = LANGS[currentLang];
-  if(!confirm(L.confirmTrl)) return;
+  const trailerName = TRAILERS[idx];
+  if (!trailerName) return;
+  if(!confirm('Trailer "' + trailerName + '" delete? · حذف؟')) return;
   TRAILERS.splice(idx,1);
+  if (!_admDeletedTrailers.includes(trailerName)) _admDeletedTrailers.push(trailerName);
   admSaveFleet();
-  admRenderTrailers();
-  showToast(L.delTrailer);
+  admRenderAll();
+  showToast('🗑️ Trailer deleted: ' + trailerName);
 }
 
 // ── PROJECTS ──
@@ -5098,8 +5734,9 @@ function admRenderProjects() {
   let html = '';
   projs.forEach(proj => {
     const truckCount = (FLEET[proj]||[]).length;
+    const emoji = _admProjectEmojis[proj] || '🏗️';
     html += '<div class="adm-item">' +
-      '<div class="adm-item-ico">🏗️</div>' +
+      '<div class="adm-item-ico">' + emoji + '</div>' +
       '<div class="adm-item-info">' +
         '<div class="adm-item-main">' + proj + '</div>' +
         '<div class="adm-item-sub">' + truckCount + ' ' + LANGS[currentLang].admTrucksReg + '</div>' +
@@ -5115,32 +5752,43 @@ function admRenderProjects() {
 function admAddProject() {
   const L = LANGS[currentLang];
   const name  = (document.getElementById('aP-name').value||'').trim().toUpperCase();
-  const emoji = (document.getElementById('aP-emoji').value||'🏗️').trim();
-  if(!name) { showToast(L.errProjName, true); return; }
-  if(FLEET[name]) { showToast(L.errProjDup, true); return; }
+  const emoji = (document.getElementById('aP-emoji').value||'🏗️').trim() || '🏗️';
+
+  if(!name) { showToast('❌ Project name zaroori hai', true); return; }
+  if(FLEET[name]) { showToast('❌ Project "' + name + '" already exists', true); return; }
+
   FLEET[name] = [];
+  _admProjectEmojis[name] = emoji; // FIX: save emoji
+
+  // Remove from deleted list if was there
+  const di = _admDeletedProjects.indexOf(name);
+  if (di > -1) _admDeletedProjects.splice(di, 1);
+
   admSaveFleet();
-  admRenderProjects();
-  const dd = document.getElementById('ddProj');
-  if(dd) {
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = emoji + ' ' + name;
-    dd.appendChild(opt);
-  }
-  ['aP-name','aP-emoji'].forEach(id => document.getElementById(id).value='');
-  showToast(L.okProject);
+  admRenderAll(); // FIX: render all so dropdowns update everywhere
+
+  ['aP-name','aP-emoji'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  showToast('✅ Project added: ' + emoji + ' ' + name);
 }
 
 function admDelProject(proj) {
   const L = LANGS[currentLang];
   const count = (FLEET[proj]||[]).length;
-  if(!confirm(L.confirmProj(proj, count))) return;
+  const confirmMsg = count > 0
+    ? 'Project "' + proj + '" delete? Iss mein ' + count + ' trucks hain — wo bhi delete honge! · حذف؟'
+    : 'Project "' + proj + '" delete? · حذف؟';
+  if(!confirm(confirmMsg)) return;
+
   delete FLEET[proj];
+  delete _admProjectEmojis[proj];
+  if (!_admDeletedProjects.includes(proj)) _admDeletedProjects.push(proj);
+
   admSaveFleet();
-  admRenderProjects();
-  rebuildProjectDropdown();
-  showToast(L.delProject);
+  admRenderAll();
+  showToast('🗑️ Project deleted: ' + proj);
 }
 
 // ════════════════════════════════════
