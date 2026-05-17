@@ -3,7 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DAL FleetCore — Smart Form System</title>
+<title>DAL FleetCore v2 — Fleet Management</title>
+
+<!-- Chart.js for Reports -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<!-- ════ FIREBASE SDK (v12 modular, via Google CDN) ════ -->
+<script type="module">
+  // Set a global flag to detect if module ran at all
+  window.dalFB_moduleStarted = true;
+
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js');
+    const {
+      getFirestore, collection, addDoc, getDocs, query,
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp
+    } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
+
+    window.dalFB = {
+      initializeApp, getApps,
+      getFirestore, collection, addDoc, getDocs, query,
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp,
+      ready: true
+    };
+    console.log('[Firebase] ✅ SDK loaded successfully');
+    document.dispatchEvent(new CustomEvent('dalFirebaseReady'));
+  } catch (err) {
+    window.dalFB_error = err.message || err.toString();
+    console.error('[Firebase] ❌ SDK load FAILED:', err);
+    document.dispatchEvent(new CustomEvent('dalFirebaseError', { detail: err }));
+  }
+</script>
+
+<!-- Fallback timeout detector -->
+<script>
+  setTimeout(() => {
+    if (!window.dalFB || !window.dalFB.ready) {
+      window.dalFB_loadTimeout = true;
+      console.warn('[Firebase] ⚠️ SDK did not load within 10 seconds. Module started:', !!window.dalFB_moduleStarted, '| Error:', window.dalFB_error || 'none');
+    }
+  }, 10000);
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap');
 
@@ -113,6 +153,34 @@
   /* STACK PILLS (vertical) */
   .vpills { display:flex; flex-direction:column; gap:5px; }
   .vpills .pill { flex:none; text-align:left; min-width:0; }
+
+  /* ══ INSPECTION CHECKLIST (Foreman) ══ */
+  .ins-cat { margin-bottom:10px; border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--bg); }
+  .ins-cat-hd { padding:10px 12px; background:rgba(167,139,250,.06); display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; border-bottom:1px solid var(--border); }
+  .ins-cat-hd.collapsed { border-bottom:none; }
+  .ins-cat-ttl { font-size:12px; font-weight:700; color:#a78bfa; display:flex; align-items:center; gap:8px; }
+  .ins-cat-badge { font-size:9px; padding:2px 7px; border-radius:10px; background:rgba(148,163,184,.15); color:var(--muted); font-weight:600; }
+  .ins-cat-badge.done { background:rgba(16,185,129,.15); color:#10b981; }
+  .ins-cat-badge.alert { background:rgba(239,68,68,.15); color:#ef4444; }
+  .ins-cat-arrow { font-size:10px; color:var(--muted); transition:transform .2s; }
+  .ins-cat-hd.collapsed .ins-cat-arrow { transform:rotate(-90deg); }
+  .ins-cat-body { padding:8px; }
+  .ins-cat-body.hidden { display:none; }
+  .ins-item { padding:8px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:var(--card); transition:border-color .2s, background .2s; }
+  .ins-item:last-child { margin-bottom:0; }
+  .ins-item.ok { border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.04); }
+  .ins-item.notok { border-color:rgba(239,68,68,.4); background:rgba(239,68,68,.04); }
+  .ins-item-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .ins-item-num { font-size:10px; font-weight:700; color:var(--muted); min-width:22px; height:22px; border-radius:50%; background:rgba(148,163,184,.12); display:flex; align-items:center; justify-content:center; }
+  .ins-item.ok .ins-item-num { background:rgba(16,185,129,.18); color:#10b981; }
+  .ins-item.notok .ins-item-num { background:rgba(239,68,68,.18); color:#ef4444; }
+  .ins-item-name { font-size:12px; color:var(--text); flex:1; font-weight:500; }
+  .ins-btns { display:flex; gap:6px; }
+  .ins-btn { flex:1; padding:7px 10px; border:1.5px solid var(--border); border-radius:7px; background:var(--bg); color:var(--muted); font-size:11px; font-weight:600; cursor:pointer; transition:all .15s; text-align:center; }
+  .ins-btn.ok-btn.sel { border-color:#10b981; background:rgba(16,185,129,.12); color:#10b981; }
+  .ins-btn.notok-btn.sel { border-color:#ef4444; background:rgba(239,68,68,.12); color:#ef4444; }
+  .ins-remark { width:100%; margin-top:6px; padding:7px 9px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:11px; font-family:inherit; resize:vertical; min-height:32px; box-sizing:border-box; display:none; }
+  .ins-item.notok .ins-remark { display:block; border-color:rgba(239,68,68,.3); }
 
   /* CHECK ROW */
   .cr { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 11px; display:flex; align-items:center; justify-content:space-between; gap:9px; margin-bottom:5px; transition:border-color .2s; }
@@ -663,6 +731,78 @@
 
   .role-arrow { color: var(--muted); font-size: 18px; }
 
+  /* ══ PIN OVERLAY ══ */
+  .pin-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.85);
+    align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .pin-overlay.show { display: flex; }
+  .pin-box {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px 20px;
+    width: 300px;
+    max-width: 92vw;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .pin-role-icon { font-size: 38px; margin-bottom: 6px; }
+  .pin-role-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .pin-label { font-size: 11px; color: var(--muted); margin-bottom: 18px; }
+  .pin-dots {
+    display: flex; justify-content: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .pin-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-dot.error { background: #ef4444; border-color: #ef4444; }
+  .pin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .pin-key {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.1s;
+  }
+  .pin-key:active { transform: scale(0.93); background: var(--accent); color: #000; }
+  .pin-key.del { font-size: 16px; color: var(--muted); }
+  .pin-key.cancel-btn {
+    grid-column: span 3;
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 0;
+  }
+  .pin-error-msg {
+    font-size: 12px;
+    color: #ef4444;
+    min-height: 18px;
+    margin-top: 4px;
+  }
+
   .login-footer {
     margin-top: 20px;
     font-size: 10px;
@@ -771,6 +911,39 @@
   <div class="login-footer">
     DAL Advanced Logistics Co.<br>
     Fleet Management System v5
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- PIN OVERLAY                           -->
+<!-- ══════════════════════════════════════ -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-role-icon" id="pinRoleIcon">🔐</div>
+    <div class="pin-role-name" id="pinRoleName">Role</div>
+    <div class="pin-label">4-digit PIN daalo · Enter PIN · أدخل الرمز</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-grid">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key del" onclick="pinDel()">⌫</div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key del" onclick="pinClear()">✕</div>
+      <div class="pin-key cancel-btn" onclick="pinCancel()">❌ Cancel · منسوخ کریں · रद्द करें</div>
+    </div>
+    <div class="pin-error-msg" id="pinError"></div>
   </div>
 </div>
 
@@ -1056,15 +1229,7 @@
             <input type="text" class="txt line" id="mtLoc" placeholder="Kahan hai truck? · أين الشاحنة؟">
           </div>
 
-          <div class="div"><div class="div-l"></div><div class="div-t">Photo (optional) · تصویر</div><div class="div-l"></div></div>
-          <div class="ph" onclick="document.getElementById('mtPh').click()">
-            <input type="file" id="mtPh" accept="image/*" capture="environment" style="display:none;" onchange="phOk(this,'mtPhIco')">
-            <div class="ph-ico" id="mtPhIco">📸</div>
-            <div class="ph-txt">Tasveer lo ya gallery se chunao · صوّر أو اختر</div>
-          </div>
-
-
-          <div class="div"><div class="div-l"></div><div class="div-t">📸 Photo · صورة · फोटो</div><div class="div-l"></div></div>
+          <div class="div"><div class="div-l"></div><div class="div-t">📸 Photo · صورة · فوٹو</div><div class="div-l"></div></div>
           <div class="fld">
             <label class="lbl">Problem Photo (recommended) · صورة المشكلة · موصى به · समस्या की फोटो (अनुशंसित)</label>
             <input type="file" id="photo-mt" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelected('mt')">
@@ -1172,11 +1337,18 @@
                 <span style="background:var(--red);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
                 <span>Call Najm · اتصل بنجم · नजम को कॉल करें</span>
               </div>
-              <a href="tel:920000560" style="text-decoration:none;">
-                <div style="background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:8px;padding:10px 14px;text-align:center;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;margin-top:2px;">
-                  📞 NAJM — 920000560
-                </div>
-              </a>
+              <div style="display:flex;gap:8px;margin-top:2px;">
+                <a href="tel:920000560" style="text-decoration:none;flex:1;">
+                  <div style="background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:8px;padding:10px 8px;text-align:center;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px;">
+                    📞 920000560
+                  </div>
+                </a>
+                <a href="tel:199033" style="text-decoration:none;flex:1;">
+                  <div style="background:linear-gradient(135deg,#dc2626,#991b1b);border-radius:8px;padding:10px 8px;text-align:center;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px;">
+                    📞 199033
+                  </div>
+                </a>
+              </div>
               <div style="font-size:11px;color:var(--text);display:flex;align-items:center;gap:8px;">
                 <span style="background:var(--red);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
                 <span>Fill this form &amp; submit · أكمل هذا النموذج وأرسله · फॉर्म भरें और जमा करें</span>
@@ -1207,10 +1379,13 @@
           <!-- NAJM CASE NO -->
           <div class="fld">
             <label class="lbl">Najm Case No. <span class="ar">· رقم قضية نجم · नजम केस नंबर</span></label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="text" class="txt line" id="acNajmCase" placeholder="e.g. DH15022695 · رقم القضية" style="flex:1;">
-              <a href="tel:920000560" style="text-decoration:none;flex-shrink:0;">
-                <div style="background:var(--red);border-radius:8px;padding:10px 12px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;">📞 Call Najm</div>
+            <input type="text" class="txt line" id="acNajmCase" placeholder="e.g. DH15022695 · رقم القضية" style="width:100%;margin-bottom:6px;">
+            <div style="display:flex;gap:6px;">
+              <a href="tel:920000560" style="text-decoration:none;flex:1;">
+                <div style="background:var(--red);border-radius:8px;padding:9px 6px;color:#fff;font-size:11px;font-weight:700;text-align:center;">📞 920000560</div>
+              </a>
+              <a href="tel:199033" style="text-decoration:none;flex:1;">
+                <div style="background:#b91c1c;border-radius:8px;padding:9px 6px;color:#fff;font-size:11px;font-weight:700;text-align:center;">📞 199033</div>
               </a>
             </div>
           </div>
@@ -1556,6 +1731,71 @@
             <div id="dashAlerts"><div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">Loading...</div></div>
           </div>
 
+          <!-- ════ REPORTS SECTION ════ -->
+          <div style="padding:0 12px 12px;">
+            <div style="background:linear-gradient(135deg,rgba(192,132,252,0.08),rgba(167,139,250,0.04));border:1.5px solid rgba(192,132,252,0.3);border-radius:12px;padding:12px;">
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="font-size:14px;font-weight:700;color:#c084fc;">📊 Reports</div>
+                <div style="font-size:9px;color:var(--muted);" id="reportRecordCount">0 records</div>
+              </div>
+
+              <!-- Period Selector -->
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">📅 Period</div>
+              <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="rep-period sel" onclick="setReportPeriod('today',this)" style="flex:1;min-width:62px;background:var(--accent);color:#000;border:none;border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">Today</button>
+                <button class="rep-period" onclick="setReportPeriod('yesterday',this)" style="flex:1;min-width:62px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">Yesterday</button>
+                <button class="rep-period" onclick="setReportPeriod('week',this)" style="flex:1;min-width:62px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">Week</button>
+                <button class="rep-period" onclick="setReportPeriod('month',this)" style="flex:1;min-width:62px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">Month</button>
+                <button class="rep-period" onclick="setReportPeriod('all',this)" style="flex:1;min-width:62px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">All</button>
+              </div>
+
+              <!-- Custom Date Range -->
+              <div style="display:flex;gap:5px;margin-bottom:10px;align-items:center;">
+                <input type="date" id="repFrom" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 7px;font-size:10px;font-family:inherit;">
+                <span style="color:var(--muted);font-size:9px;">→</span>
+                <input type="date" id="repTo" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 7px;font-size:10px;font-family:inherit;">
+                <button onclick="applyReportCustomRange()" style="background:var(--accent);color:#000;border:none;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;">Go</button>
+              </div>
+
+              <!-- Group By Selector -->
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">👥 Group By</div>
+              <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="rep-group sel" onclick="setReportGroup('driver',this)" style="flex:1;min-width:60px;background:var(--accent);color:#000;border:none;border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">🚛 Driver</button>
+                <button class="rep-group" onclick="setReportGroup('foreman',this)" style="flex:1;min-width:60px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">🏭 Foreman</button>
+                <button class="rep-group" onclick="setReportGroup('tireman',this)" style="flex:1;min-width:60px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">🛞 Tireman</button>
+                <button class="rep-group" onclick="setReportGroup('truck',this)" style="flex:1;min-width:60px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">🚚 Truck</button>
+                <button class="rep-group" onclick="setReportGroup('project',this)" style="flex:1;min-width:60px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">📦 Project</button>
+              </div>
+
+              <!-- Summary Stats Cards -->
+              <div id="reportStats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;"></div>
+
+              <!-- Daily Trend Chart -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📈 Daily Trend</div>
+                <canvas id="reportTrendChart" height="100"></canvas>
+              </div>
+
+              <!-- Distribution Chart -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px;">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🍩 Type Distribution</div>
+                <canvas id="reportTypeChart" height="120"></canvas>
+              </div>
+
+              <!-- Detailed Group List -->
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;" id="reportGroupLabel">👤 By Driver</div>
+              <div id="reportGroupList" style="margin-bottom:10px;"></div>
+
+              <!-- Export Buttons -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button onclick="exportReportCSV()" style="background:linear-gradient(135deg,#10b981,#34d399);color:#000;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">📥 Summary CSV</button>
+                <button onclick="exportReportDetailCSV()" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">📋 Detailed CSV</button>
+              </div>
+              <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:6px;">CSV files Excel mein open kar sakte ho · يمكن فتح الملفات في Excel</div>
+            </div>
+          </div>
+
           <!-- LINKS -->
           <div style="padding:0 12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1NKsJZbJB8_PerU-SsXEySYMs1X4Jt9mwX78qCtMgT0U/edit"
@@ -1807,7 +2047,40 @@
             <textarea class="txt" id="wsNotes" rows="3" placeholder="Workshop notes · ملاحظات الورشة"></textarea>
           </div>
 
-          <div style="font-size:10px;color:var(--muted);background:rgba(14,165,233,.04);border:1px solid rgba(14,165,233,.12);border-radius:6px;padding:7px 10px;margin-bottom:2px;">
+          <!-- ══ INSPECTION CHECKLIST (Foreman only) ══ -->
+          <div class="div"><div class="div-l"></div><div class="div-t">🔍 Vehicle Inspection · فحص المركبة · معائنہ</div><div class="div-l"></div></div>
+
+          <div style="font-size:10px;color:var(--muted);background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:6px;padding:7px 10px;margin-bottom:8px;">
+            ℹ️ Har item ke liye OK ya Not OK select karo · حدد لكل بند
+          </div>
+
+          <!-- Quick action: All OK -->
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <button type="button" class="ins-quick" onclick="insAllOK()" style="flex:1;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.4);color:#10b981;padding:8px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">✅ All OK · سب ٹھیک</button>
+            <button type="button" class="ins-quick" onclick="insReset()" style="flex:1;background:rgba(148,163,184,.08);border:1px solid var(--border);color:var(--muted);padding:8px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">🔄 Reset · ری سیٹ</button>
+          </div>
+
+          <!-- Inspection Status Summary -->
+          <div id="insSummary" style="display:flex;gap:6px;margin-bottom:10px;font-size:10px;">
+            <div style="flex:1;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:6px;padding:6px;text-align:center;">
+              <div style="color:#10b981;font-weight:700;font-size:14px;" id="insOkCount">0</div>
+              <div style="color:var(--muted);">OK</div>
+            </div>
+            <div style="flex:1;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:6px;text-align:center;">
+              <div style="color:#ef4444;font-weight:700;font-size:14px;" id="insNotOkCount">0</div>
+              <div style="color:var(--muted);">Not OK</div>
+            </div>
+            <div style="flex:1;background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:6px;padding:6px;text-align:center;">
+              <div style="color:var(--muted);font-weight:700;font-size:14px;" id="insPendCount">22</div>
+              <div style="color:var(--muted);">Pending</div>
+            </div>
+          </div>
+
+          <!-- Inspection container — populated by JS -->
+          <div id="inspectionContainer"></div>
+
+
+          <div style="font-size:10px;color:var(--muted);background:rgba(14,165,233,.04);border:1px solid rgba(14,165,233,.12);border-radius:6px;padding:7px 10px;margin-bottom:2px;margin-top:10px;">
             🕐 Waqt khudkaar save hoga · الوقت يُحفظ تلقائياً
           </div>
 
@@ -2169,6 +2442,66 @@
 <!-- ════════════ PAGE: SETUP ════════════ -->
 <div class="page" id="page-setup">
   <div style="padding:13px;">
+
+    <!-- ══ FIREBASE CLOUD SETUP (RECOMMENDED) ══ -->
+    <div class="gc" style="border:2px solid #f97316;background:rgba(249,115,22,.05);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:700;color:#f97316;">☁️ Firebase Cloud Backend <span style="font-size:10px;background:#f97316;color:#000;padding:2px 6px;border-radius:4px;margin-left:4px;">RECOMMENDED</span></div>
+        <div id="cloudStatus" style="font-size:10px;color:var(--muted);">Checking...</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;">
+        Real-time sync · Offline support · Free tier 50K reads/day · No Apps Script
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <input type="text" id="fbApiKey"     class="txt" placeholder="apiKey (AIzaSy...)" style="font-size:11px;font-family:monospace;">
+        <input type="text" id="fbAuthDomain" class="txt" placeholder="authDomain (project.firebaseapp.com)" style="font-size:11px;font-family:monospace;">
+        <input type="text" id="fbProjectId"  class="txt" placeholder="projectId (your-project-id)" style="font-size:11px;font-family:monospace;">
+        <input type="text" id="fbStorageBucket" class="txt" placeholder="storageBucket (optional)" style="font-size:11px;font-family:monospace;">
+        <input type="text" id="fbAppId"      class="txt" placeholder="appId (1:...:web:...)" style="font-size:11px;font-family:monospace;">
+
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="sbtn" onclick="saveFirebaseConfig()" style="flex:1;background:#f97316;color:#000;font-weight:700;font-size:12px;">💾 Connect Firebase</button>
+          <button class="sbtn" onclick="testFirebaseConnection()" style="flex:1;background:rgba(148,163,184,.15);color:var(--text);font-size:12px;">🧪 Test</button>
+        </div>
+        <button onclick="clearFirebaseConfig()" style="background:none;border:none;color:#ef4444;font-size:10px;cursor:pointer;margin-top:4px;text-decoration:underline;">Disconnect Firebase</button>
+      </div>
+
+      <details style="margin-top:12px;font-size:11px;">
+        <summary style="cursor:pointer;color:#f97316;font-weight:600;padding:4px 0;">📖 Firebase setup guide (3 minutes) — tap to open</summary>
+        <div style="padding:10px;background:rgba(0,0,0,.2);border-radius:6px;margin-top:6px;line-height:1.7;color:var(--text);">
+          <div style="font-weight:700;color:#fbbf24;margin-bottom:4px;">Step 1: Firebase project banao</div>
+          1. <a href="https://console.firebase.google.com" target="_blank" style="color:#3b82f6;">console.firebase.google.com</a> kholo<br>
+          2. <b>Add project</b> → naam do (e.g. "dal-fleetcore") → Continue<br>
+          3. Analytics: <b>Disable</b> (zaroori nahi) → Create project<br>
+
+          <div style="font-weight:700;color:#fbbf24;margin:10px 0 4px;">Step 2: Firestore Database banao</div>
+          1. Left menu se <b>Build → Firestore Database</b> kholo<br>
+          2. <b>Create database</b> → Location: <b>asia-south1</b> (Mumbai, closest to Saudi)<br>
+          3. Mode: <b>Start in test mode</b> → Enable<br>
+
+          <div style="font-weight:700;color:#fbbf24;margin:10px 0 4px;">Step 3: Web app register karo</div>
+          1. Project Overview pe ⚙️ icon → <b>Project settings</b><br>
+          2. Scroll niche → <b>Your apps</b> → <b>&lt;/&gt;</b> (Web) icon click karo<br>
+          3. Nickname: "DAL FleetCore" → <b>Register app</b><br>
+          4. Aage screen pe <b>firebaseConfig</b> object dikhega — uske values copy karke yahaan paste karo:<br>
+          <span style="font-family:monospace;color:#10b981;font-size:10px;">apiKey, authDomain, projectId, storageBucket, appId</span><br>
+
+          <div style="font-weight:700;color:#fbbf24;margin:10px 0 4px;">Step 4: Security Rules (1 minute)</div>
+          1. Firestore Database → <b>Rules</b> tab<br>
+          2. Yeh rules paste karo (sirf 30 din tak open access):<br>
+          <div style="background:#000;padding:8px;border-radius:4px;font-family:monospace;font-size:10px;color:#10b981;margin:4px 0;">rules_version = '2';<br>service cloud.firestore {<br>&nbsp;&nbsp;match /databases/{database}/documents {<br>&nbsp;&nbsp;&nbsp;&nbsp;match /entries/{doc} {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if true;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</div>
+          3. <b>Publish</b> click karo<br>
+          ⚠️ Production ke liye baad mein authentication enable karna behtar hai.
+
+          <div style="font-weight:700;color:#fbbf24;margin:10px 0 4px;">Step 5: Connect</div>
+          Upar 5 fields fill karo → <b>Connect Firebase</b> dabao → done! ☁️
+        </div>
+      </details>
+    </div>
+
+    <div style="text-align:center;color:var(--muted);font-size:10px;margin:14px 0;">— OR (Optional) —</div>
+
     <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:3px;">⚙️ Google Sheets Setup Guide</div>
     <div style="font-size:10px;color:var(--muted);margin-bottom:13px;">Step by step connection · ربط Google Sheets خطوة بخطوة</div>
 
@@ -2219,75 +2552,113 @@ Position|Reason|OldTire|NewTire|Location|KM</div>
         <div style="flex:1;">
           <div class="gt">Yeh code paste karo (Code.gs mein)</div>
           <button class="cpbtn" onclick="copyCode()">📋 Copy</button>
-          <div class="codeblk" id="scriptTxt">function doPost(e) {
-  try {
-    var d = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName(d.sheet);
+          <div class="codeblk" id="scriptTxt">// DAL FleetCore — Apps Script Backend v3
+// DEPLOY: Execute as Me | Access: Anyone
 
-    // FLEET_DATA / TRAILERS replace action (from Admin panel)
+var SHEET_HEADERS = {
+  'Checklist':  ['Timestamp','Project','Truck','Trailer','Driver','TripType','KM_Start','KM_End','Belts','Oil','Brake','Hydraulic','Coolant','Leaks','Temp','OilGauge','Fuel','Air','Headlamp','Signal','BrakeLights','SideLights','Hazard','Revolving','Boom','Seat','Seatbelt','Doors','Windows','Wipers','Horn','Pedals','Reversa','Battery','Clean','5thWheel','Locking','BoomGrease','Cone','FireExt','Barrier','Chock','RegPlate','Docs','Uniform','Tires','Spare','TireData','Notes'],
+  'Maintenance':['Timestamp','Project','Truck','Trailer','Driver','Type','Priority','Description','Location'],
+  'Breakdown':  ['Timestamp','Project','Truck','Trailer','Driver','Type','Location','Blocking','Description'],
+  'Accident':   ['Timestamp','Project','Truck','Trailer','Driver','Type','Location','NajmCase','NajmLink','OtherVehicle','Injury','Description'],
+  'Workshop':   ['Timestamp','Project','Truck','Trailer','Driver','Action','Mechanic','Notes'],
+  'Outside':    ['Timestamp','Project','Truck','Trailer','Driver','JobCard','SendDate','Odometer','WorkshopName','City','RepairType','Description','Cost','ReturnDate'],
+  'Tire':       ['Timestamp','Project','Truck','Trailer','Driver','Date','KM','Position','OldSerial','OldSize','OldBrand','OldMonths','NewSerial','NewSize','NewBrand','Reason','Location','RequestedBy','Notes'],
+  'FLEET_DATA': ['Project','Plate','Trailer','Driver','Make','Type'],
+  'TRAILERS':   ['TrailerNo']
+};
+
+function doPost(e) {
+  try {
+    // Accept both application/json and text/plain (no-cors sends text/plain)
+    var raw = e.postData ? e.postData.contents : '';
+    var d = JSON.parse(raw);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // REPLACE action — Admin panel fleet sync
     if (d.action === 'replace') {
+      var sh = ss.getSheetByName(d.sheet);
       if (!sh) sh = ss.insertSheet(d.sheet);
       sh.clearContents();
-      var headers = {
-        'FLEET_DATA':['Project','Plate','Trailer','Driver','Make','Type'],
-        'TRAILERS':  ['TrailerNo']
-      };
-      if (headers[d.sheet]) sh.appendRow(headers[d.sheet]);
-      if (d.rows && d.rows.length) d.rows.forEach(function(r){sh.appendRow(r);});
-      return out({status:'success', msg:d.sheet+' updated'});
+      if (SHEET_HEADERS[d.sheet]) {
+        sh.appendRow(SHEET_HEADERS[d.sheet]);
+        sh.getRange(1,1,1,SHEET_HEADERS[d.sheet].length).setBackground('#1a73e8').setFontColor('#fff').setFontWeight('bold');
+        sh.setFrozenRows(1);
+      }
+      if (d.rows && d.rows.length) d.rows.forEach(function(r){ sh.appendRow(r); });
+      return out({status:'success', msg: d.sheet + ' updated'});
     }
 
-    // Auto-create sheet with headers if missing
+    // APPEND action — Normal form submission
+    var shName = d.sheet;
+    if (!shName) return out({status:'error', msg:'No sheet name'});
+    var sh = ss.getSheetByName(shName);
     if (!sh) {
-      sh = ss.insertSheet(d.sheet);
-      var H = {
-        'Checklist':  ['Timestamp','Project','Truck','Trailer','Driver','TripType','KM','Belts','Oil','Brake','Hydraulic','Coolant','Leaks','Temp','OilGauge','Fuel','Air','Headlamp','Signal','BrakeLights','SideLights','Hazard','Revolving','Boom','Seat','Seatbelt','Doors','Windows','Wipers','Horn','Pedals','Reversa','Battery','Clean','5thWheel','Locking','BoomGrease','Cone','FireExt','Barrier','Chock','RegPlate','Docs','Uniform','Tires','Spare','TireData','Notes'],
-        'Maintenance':['Timestamp','Project','Truck','Trailer','Driver','Type','Priority','Description','Location'],
-        'Breakdown':  ['Timestamp','Project','Truck','Trailer','Driver','Type','Location','Blocking','Description'],
-        'Accident':   ['Timestamp','Project','Truck','Trailer','Driver','Type','Location','NajmCase','NajmLink','OtherVehicle','Injury','Description'],
-        'Workshop':   ['Timestamp','Project','Truck','Trailer','Driver','Action','Mechanic','Notes'],
-        'Outside':    ['Timestamp','Project','Truck','Trailer','Driver','JobCard','SendDate','Odometer','WorkshopName','City','RepairType','Description','Cost','ReturnDate'],
-        'Tire':       ['Timestamp','Project','Truck','Trailer','Driver','Date','KM','Position','OldSerial','OldSize','OldBrand','OldMonths','NewSerial','NewSize','NewBrand','Reason','Location','RequestedBy','Notes']
-      };
-      if (H[d.sheet]) sh.appendRow(H[d.sheet]);
+      sh = ss.insertSheet(shName);
+      if (SHEET_HEADERS[shName]) {
+        sh.appendRow(SHEET_HEADERS[shName]);
+        sh.getRange(1,1,1,SHEET_HEADERS[shName].length).setBackground('#1a73e8').setFontColor('#fff').setFontWeight('bold');
+        sh.setFrozenRows(1);
+      }
     }
-    d.row.unshift(new Date().toLocaleString('en-SA',{timeZone:'Asia/Riyadh',hour12:false}));
-    sh.appendRow(d.row);
+    var ts = Utilities.formatDate(new Date(), 'Asia/Riyadh', 'dd/MM/yyyy HH:mm:ss');
+    var row = d.row || [];
+    row.unshift(ts);
+    sh.appendRow(row);
     return out({status:'success'});
+
   } catch(err) {
-    return out({status:'error',msg:err.toString()});
+    return out({status:'error', msg: err.toString()});
   }
 }
 
 function doGet(e) {
-  var action = (e&&e.parameter&&e.parameter.action)||'ping';
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  try {
+    var action = (e && e.parameter && e.parameter.action) || 'ping';
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  if (action === 'fleet') {
-    var fs = ss.getSheetByName('FLEET_DATA');
-    var fleet = {};
-    if (fs) {
-      var rows = fs.getDataRange().getValues();
-      for (var i=1;i<rows.length;i++) {
-        var p=rows[i][0]; if(!p) continue;
-        if(!fleet[p]) fleet[p]=[];
-        fleet[p].push({plate:rows[i][1]||'',trailer:rows[i][2]||'',driver:rows[i][3]||'',make:rows[i][4]||'',type:rows[i][5]||''});
+    if (action === 'fleet') {
+      var fleet = {};
+      var fs = ss.getSheetByName('FLEET_DATA');
+      if (fs && fs.getLastRow() > 1) {
+        var rows = fs.getDataRange().getValues();
+        for (var i = 1; i < rows.length; i++) {
+          var p = rows[i][0]; if (!p) continue;
+          if (!fleet[p]) fleet[p] = [];
+          fleet[p].push({plate:rows[i][1]||'',trailer:rows[i][2]||'',driver:rows[i][3]||'',make:rows[i][4]||'',type:rows[i][5]||''});
+        }
       }
+      var trailers = [];
+      var ts = ss.getSheetByName('TRAILERS');
+      if (ts && ts.getLastRow() > 1) {
+        var tr = ts.getDataRange().getValues();
+        for (var j = 1; j < tr.length; j++) { if (tr[j][0]) trailers.push(tr[j][0]); }
+      }
+      return out({status:'ok', fleet:fleet, trailers:trailers});
     }
-    var ts = ss.getSheetByName('TRAILERS');
-    var trailers = [];
-    if (ts) {
-      var tr = ts.getDataRange().getValues();
-      for (var j=1;j<tr.length;j++) { if(tr[j][0]) trailers.push(tr[j][0]); }
-    }
-    return out({status:'ok',fleet:fleet,trailers:trailers});
+    return out({status:'ok', msg:'DAL FleetCore API v3 ready ✅'});
+  } catch(err) {
+    return out({status:'error', msg: err.toString()});
   }
-  return out({status:'ok',msg:'DAL FleetCore API ready'});
 }
 
 function out(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Run once manually to create all sheets
+function initAllSheets() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  Object.keys(SHEET_HEADERS).forEach(function(name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      sh.appendRow(SHEET_HEADERS[name]);
+      sh.getRange(1,1,1,SHEET_HEADERS[name].length).setBackground('#1a73e8').setFontColor('#fff').setFontWeight('bold');
+      sh.setFrozenRows(1);
+    }
+  });
+  Browser.msgBox('✅ Done! All sheets created.');
 }</div>
         </div>
       </div>
@@ -2430,7 +2801,139 @@ let selProj = '';
 let selTruck = null;
 let pillVals = {};
 let chkVals  = {};
-let sheetsUrl = localStorage.getItem('dalUrl') || 'https://script.google.com/macros/s/AKfycbwAnh3mWZY_rlPVBLZOR7mAzILmeT7l3oU_KPRkqSy-vqxRFRxfDshIiYgxJIpcuZg1UQ/exec';
+let sheetsUrl = localStorage.getItem('dalUrl') || 'https://script.google.com/macros/s/AKfycbwAnh3mWZY_rlPVBLZOR7mAzILmeT7l3oU_KPRkqSy-vqxRFRxfDshIiYgxJlpcuZg1UQ/exec';
+
+// ════════════════════════════════════════════════════════════
+// ☁️  DAL CLOUD — Firebase Firestore Integration
+// Real-time sync, offline-capable, zero-Apps-Script backend
+// ════════════════════════════════════════════════════════════
+const dalCloud = {
+  app: null,
+  db: null,
+  config: null,
+  enabled: false,
+  listeners: {},
+
+  // Load config from localStorage and init Firebase
+  init() {
+    try {
+      const cfgStr = localStorage.getItem('dalFirebaseConfig');
+      if (!cfgStr) return false;
+      const cfg = JSON.parse(cfgStr);
+      if (!cfg.apiKey || !cfg.projectId) return false;
+      if (!window.dalFB || !window.dalFB.ready) {
+        // Firebase libs not loaded yet — retry shortly
+        document.addEventListener('dalFirebaseReady', () => this.init(), {once:true});
+        return false;
+      }
+      this.config = cfg;
+      // Reuse existing app if already initialized (hot reload safety)
+      const existing = window.dalFB.getApps();
+      this.app = existing.length ? existing[0] : window.dalFB.initializeApp(cfg);
+      this.db  = window.dalFB.getFirestore(this.app);
+      this.enabled = true;
+      console.log('[dalCloud] ✅ Firebase initialized:', cfg.projectId);
+      // Refresh status indicator if it exists
+      if (typeof refreshCloudStatus === 'function') refreshCloudStatus();
+      // Start listening for manager dashboard if currently viewing it
+      if (typeof refreshDashboard === 'function') refreshDashboard();
+      return true;
+    } catch (e) {
+      console.warn('[dalCloud] Init error:', e);
+      this.enabled = false;
+      return false;
+    }
+  },
+
+  // Save an entry to Firestore
+  async saveEntry(sheetName, rowData, meta) {
+    if (!this.enabled || !this.db) return { ok:false, reason:'not-enabled' };
+    try {
+      const fb = window.dalFB;
+      const docData = {
+        sheet: sheetName,
+        row: rowData,
+        meta: meta || {},
+        createdAt: fb.serverTimestamp(),
+        clientTime: new Date().toISOString()
+      };
+      const colRef = fb.collection(this.db, 'entries');
+      const ref = await fb.addDoc(colRef, docData);
+      return { ok:true, id: ref.id };
+    } catch (e) {
+      console.warn('[dalCloud] Save error:', e);
+      return { ok:false, reason: e.message };
+    }
+  },
+
+  // Load recent entries from Firestore
+  async loadEntries(maxN) {
+    if (!this.enabled || !this.db) return [];
+    try {
+      const fb = window.dalFB;
+      const colRef = fb.collection(this.db, 'entries');
+      const q = fb.query(colRef, fb.orderBy('createdAt','desc'), fb.limit(maxN || 200));
+      const snap = await fb.getDocs(q);
+      const out = [];
+      snap.forEach(doc => out.push({ id: doc.id, ...doc.data() }));
+      return out;
+    } catch (e) {
+      console.warn('[dalCloud] Load error:', e);
+      return [];
+    }
+  },
+
+  // Subscribe to real-time updates (for Manager dashboard)
+  subscribe(callback, maxN) {
+    if (!this.enabled || !this.db) return null;
+    try {
+      const fb = window.dalFB;
+      const colRef = fb.collection(this.db, 'entries');
+      const q = fb.query(colRef, fb.orderBy('createdAt','desc'), fb.limit(maxN || 200));
+      const unsub = fb.onSnapshot(q, snap => {
+        const out = [];
+        snap.forEach(doc => out.push({ id: doc.id, ...doc.data() }));
+        callback(out);
+      }, err => {
+        console.warn('[dalCloud] Subscribe error:', err);
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('[dalCloud] Subscribe failed:', e);
+      return null;
+    }
+  },
+
+  // Save/update config
+  setConfig(cfg) {
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      throw new Error('Invalid config — apiKey aur projectId zaroori hain');
+    }
+    localStorage.setItem('dalFirebaseConfig', JSON.stringify(cfg));
+    this.config = cfg;
+    // Force re-init (will replace any existing app)
+    this.enabled = false;
+    return this.init();
+  },
+
+  clearConfig() {
+    localStorage.removeItem('dalFirebaseConfig');
+    this.enabled = false;
+    this.app = null;
+    this.db = null;
+    this.config = null;
+  }
+};
+
+// Auto-init on page load (once Firebase libs are ready)
+if (window.dalFB && window.dalFB.ready) {
+  dalCloud.init();
+} else {
+  document.addEventListener('dalFirebaseReady', () => dalCloud.init(), {once:true});
+}
+// Expose for debugging
+window.dalCloud = dalCloud;
+
 let histData  = JSON.parse(localStorage.getItem('dalHist') || '[]');
 let histFilter = 'all';
 const SYNC_QUEUE_KEY = 'dalSyncQueue';
@@ -2459,12 +2962,7 @@ function queueForSync(entry) {
   } catch(e) {}
 }
 
-// Init
-if (sheetsUrl) {
-  document.getElementById('sheetsUrl').value = sheetsUrl;
-  setConnected();
-}
-renderHistory();
+// Init — merged into DOMContentLoaded below
 
 // ════ DROPDOWN LOGIC ════
 
@@ -2547,6 +3045,164 @@ function setPill(el, key, val) {
   pillVals[key] = val;
 }
 
+// ════ INSPECTION CHECKLIST (Foreman) ════
+const INSPECTION_ITEMS = [
+  { cat:'Engine Check',        catAr:'فحص المحرك',      icon:'⚙️', items:[
+    'Engine oil level','Coolant level','Leakage checking','Belt condition','Battery condition'
+  ]},
+  { cat:'Tire Check',           catAr:'فحص الإطارات',    icon:'🛞', items:[
+    'Tire pressure','Tire damage or cuts','Wheel nut condition'
+  ]},
+  { cat:'Brake & Air System',   catAr:'الفرامل والهواء', icon:'🛑', items:[
+    'Air pressure','Brake performance','Air leakage'
+  ]},
+  { cat:'Electrical Check',     catAr:'الكهرباء',        icon:'⚡', items:[
+    'Headlights','Indicators','Reverse light','Horn','Battery charging'
+  ]},
+  { cat:'Body & Safety Check',  catAr:'الهيكل والسلامة', icon:'🛡️', items:[
+    'Cabin lock','Mirrors','Fire extinguisher','Reflector tape','Tarpaulin condition','Hopper / Tanker body condition'
+  ]},
+];
+
+// State: { 1:{status:'OK'|'NOTOK'|null, remark:'', name, cat}, 2:{...}, ... }
+let inspectionState = {};
+
+function buildInspection() {
+  const container = document.getElementById('inspectionContainer');
+  if (!container) return;
+  let html = '';
+  let num = 0;
+  INSPECTION_ITEMS.forEach((grp, gIdx) => {
+    const itemsHtml = grp.items.map(item => {
+      num++;
+      if (!inspectionState[num]) inspectionState[num] = { status:null, remark:'', name:item, cat:grp.cat };
+      return ''
+        + '<div class="ins-item" id="ins-item-' + num + '">'
+        +   '<div class="ins-item-top">'
+        +     '<div class="ins-item-num">' + num + '</div>'
+        +     '<div class="ins-item-name">' + item + '</div>'
+        +   '</div>'
+        +   '<div class="ins-btns">'
+        +     '<button type="button" class="ins-btn ok-btn" onclick="insSet(' + num + ',\'OK\')">✓ OK</button>'
+        +     '<button type="button" class="ins-btn notok-btn" onclick="insSet(' + num + ',\'NOTOK\')">✕ Not OK</button>'
+        +   '</div>'
+        +   '<textarea class="ins-remark" id="ins-remark-' + num + '" placeholder="Remarks · ملاحظات (kya problem hai?)" oninput="insRemark(' + num + ',this.value)"></textarea>'
+        + '</div>';
+    }).join('');
+
+    html += ''
+      + '<div class="ins-cat" id="ins-cat-' + gIdx + '">'
+      +   '<div class="ins-cat-hd" onclick="insToggle(' + gIdx + ')">'
+      +     '<div class="ins-cat-ttl">' + grp.icon + ' ' + grp.cat + ' <span style="font-size:10px;color:var(--muted);font-weight:400;">· ' + grp.catAr + '</span></div>'
+      +     '<div style="display:flex;align-items:center;gap:8px;">'
+      +       '<span class="ins-cat-badge" id="ins-cat-badge-' + gIdx + '">0/' + grp.items.length + '</span>'
+      +       '<span class="ins-cat-arrow">▼</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="ins-cat-body">' + itemsHtml + '</div>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+  insUpdateSummary();
+}
+
+function insToggle(gIdx) {
+  const cat = document.getElementById('ins-cat-' + gIdx);
+  if (!cat) return;
+  const hd = cat.querySelector('.ins-cat-hd');
+  const body = cat.querySelector('.ins-cat-body');
+  hd.classList.toggle('collapsed');
+  body.classList.toggle('hidden');
+}
+
+function insSet(num, status) {
+  if (!inspectionState[num]) return;
+  inspectionState[num].status = status;
+  const item = document.getElementById('ins-item-' + num);
+  if (!item) return;
+  item.classList.remove('ok','notok');
+  item.classList.add(status === 'OK' ? 'ok' : 'notok');
+  item.querySelectorAll('.ins-btn').forEach(b => b.classList.remove('sel'));
+  item.querySelector(status === 'OK' ? '.ok-btn' : '.notok-btn').classList.add('sel');
+  insUpdateSummary();
+}
+
+function insRemark(num, val) {
+  if (inspectionState[num]) inspectionState[num].remark = val;
+}
+
+function insAllOK() {
+  Object.keys(inspectionState).forEach(num => {
+    insSet(parseInt(num), 'OK');
+  });
+}
+
+function insReset() {
+  Object.keys(inspectionState).forEach(num => {
+    inspectionState[num].status = null;
+    inspectionState[num].remark = '';
+    const item = document.getElementById('ins-item-' + num);
+    if (item) {
+      item.classList.remove('ok','notok');
+      item.querySelectorAll('.ins-btn').forEach(b => b.classList.remove('sel'));
+      const rmk = document.getElementById('ins-remark-' + num);
+      if (rmk) rmk.value = '';
+    }
+  });
+  insUpdateSummary();
+}
+
+function insUpdateSummary() {
+  let ok = 0, notok = 0, pend = 0;
+  Object.values(inspectionState).forEach(s => {
+    if (s.status === 'OK') ok++;
+    else if (s.status === 'NOTOK') notok++;
+    else pend++;
+  });
+  const okEl = document.getElementById('insOkCount');
+  const noEl = document.getElementById('insNotOkCount');
+  const pdEl = document.getElementById('insPendCount');
+  if (okEl) okEl.textContent = ok;
+  if (noEl) noEl.textContent = notok;
+  if (pdEl) pdEl.textContent = pend;
+
+  // Per-category badges
+  let num = 0;
+  INSPECTION_ITEMS.forEach((grp, gIdx) => {
+    let cOk = 0, cNot = 0, cTot = grp.items.length;
+    for (let i = 0; i < cTot; i++) {
+      num++;
+      const s = inspectionState[num];
+      if (s && s.status === 'OK') cOk++;
+      else if (s && s.status === 'NOTOK') cNot++;
+    }
+    const badge = document.getElementById('ins-cat-badge-' + gIdx);
+    if (badge) {
+      badge.classList.remove('done','alert');
+      const done = cOk + cNot;
+      badge.textContent = done + '/' + cTot;
+      if (cNot > 0) badge.classList.add('alert');
+      else if (done === cTot) badge.classList.add('done');
+    }
+  });
+}
+
+// Build a compact summary string for submission
+function insGetSummary() {
+  const lines = [];
+  let totalOk = 0, totalNotOk = 0, totalPend = 0;
+  Object.keys(inspectionState).forEach(num => {
+    const s = inspectionState[num];
+    if (s.status === 'OK') totalOk++;
+    else if (s.status === 'NOTOK') {
+      totalNotOk++;
+      lines.push('#' + num + ' ' + s.cat + ' - ' + s.name + ': NOT OK' + (s.remark ? ' (' + s.remark + ')' : ''));
+    } else totalPend++;
+  });
+  const header = 'OK:' + totalOk + ' | NotOK:' + totalNotOk + ' | Pending:' + totalPend;
+  return lines.length ? (header + ' || ISSUES: ' + lines.join(' ; ')) : header;
+}
+
 function setChk(key, status, btn) {
   const row = btn.closest('.cr');
   row.querySelectorAll('.cb2').forEach(b => b.classList.remove('sel'));
@@ -2563,23 +3219,25 @@ function phOk(inp, id) {
 // ════ SUBMIT ════
 
 async function doSubmit(type) {
-  if (!selTruck) { showToast('❌ Pehle truck select karo!', true); return; }
+  if (!selTruck) { showToast('❌ Pehle truck select karo! · اختر الشاحنة أولاً! · पहले ट्रक चुनें!', true); return; }
 
   const proj    = selProj;
   const truck   = selTruck.plate;
   const driver  = document.getElementById('ddDriver').value;
   const trailer = document.getElementById('ddTrailer').value;
 
-  if (!driver || driver.startsWith('--'))  { showToast('❌ Driver chunna zaruri hai!', true); return; }
-  if (!trailer || trailer.startsWith('--')) { showToast('❌ Trailer chunna zaruri hai!', true); return; }
+  if (!driver || driver.startsWith('--'))  { showToast('❌ Driver chunna zaruri hai! · اختر السائق! · ड्राइवर चुनें!', true); return; }
+  if (!trailer || trailer.startsWith('--')) { showToast('❌ Trailer chunna zaruri hai! · اختر المقطورة! · ट्रेलर चुनें!', true); return; }
 
   let sheet = '', row = [];
 
   if (type === 'checklist') {
-    if (!pillVals['tripType']) { showToast('❌ Trip Type chunna!', true); return; }
+    if (!pillVals['tripType']) { showToast('❌ Trip Type chunna! · اختر نوع الرحلة! · यात्रा प्रकार चुनें!', true); return; }
     sheet = 'Checklist';
     row = [proj,truck,trailer,driver,
-      pillVals['tripType']||'—', document.getElementById('clKm').value||'—',
+      pillVals['tripType']||'—',
+      document.getElementById('clKmStart').value||'—',
+      document.getElementById('clKmEnd').value||'—',
       // Engine & Fluids
       chkVals['belts']||'—', chkVals['oil']||'—', chkVals['brake']||'—',
       chkVals['hydraulic']||'—', chkVals['coolant']||'—', chkVals['leaks']||'—',
@@ -2592,11 +3250,13 @@ async function doSubmit(type) {
       chkVals['seat']||'—', chkVals['seatbelt']||'—', chkVals['doors']||'—',
       chkVals['windows']||'—', chkVals['wipers']||'—', chkVals['horn']||'—',
       chkVals['pedals']||'—', chkVals['reversa']||'—', chkVals['battery']||'—', chkVals['clean']||'—',
+      chkVals['cleanInt']||'—', chkVals['seatBelts']||'—', chkVals['wipers']||'—', chkVals['wheelChock']||'—',
+      chkVals['allDocs']||'—', chkVals['uniform']||'—',
       // Mechanical
       chkVals['5thwheel']||'—', chkVals['locking']||'—', chkVals['boomgrease']||'—',
       // Safety & Docs
       chkVals['cone']||'—', chkVals['fireext']||'—', chkVals['barrier']||'—',
-      chkVals['chock']||'—', chkVals['regplate']||'—', chkVals['docs']||'—', chkVals['uniform']||'—',
+      chkVals['chock']||'—', chkVals['regplate']||'—', chkVals['docs']||'—',
       // Tires
       chkVals['tires']||'—', chkVals['spare']||'—',
       // Tire PSI & Condition
@@ -2605,7 +3265,7 @@ async function doSubmit(type) {
 
   } else if (type === 'maintenance') {
     const desc = document.getElementById('mtDesc').value.trim();
-    if (!desc) { showToast('❌ Description likhna zaruri hai!', true); return; }
+    if (!desc) { showToast('❌ Description likhna zaruri! · اكتب الوصف! · विवरण लिखें!', true); return; }
     sheet = 'Maintenance';
     row = [proj,truck,trailer,driver,
       document.getElementById('mtType').value||'—',
@@ -2621,12 +3281,14 @@ async function doSubmit(type) {
       document.getElementById('bdDesc').value||'—'];
 
   } else if (type === 'workshop') {
-    if (!pillVals['wsAct']) { showToast('❌ Action chunna!', true); return; }
+    if (!pillVals['wsAct']) { showToast('❌ Action chunna! · اختر الإجراء! · कार्य चुनें!', true); return; }
     sheet = 'Workshop';
+    const inspSummary = (typeof insGetSummary === 'function') ? insGetSummary() : '—';
     row = [proj,truck,trailer,driver,
       pillVals['wsAct'],
       document.getElementById('wsMech').value||'—',
-      document.getElementById('wsNotes').value||'—'];
+      document.getElementById('wsNotes').value||'—',
+      inspSummary];
 
   } else if (type === 'accident') {
     sheet = 'Accident';
@@ -2674,31 +3336,17 @@ async function doSubmit(type) {
   // Loading state
   const panelMap = {checklist:'cl',maintenance:'mt',breakdown:'bd',accident:'ac',workshop:'ws',outside:'or',tire:'tc'};
   const btn = document.querySelector(`#fpanel-${panelMap[type]||'cl'} .sbtn`);
-  btn.disabled = true;
-  btn.querySelector('.btxt').style.display = 'none';
-  btn.querySelector('.spn').style.display = 'inline';
-
-  let ok = false;
-  if (sheetsUrl) {
-    try {
-      const r = await fetch(sheetsUrl, {
-        method:'POST',
-        body: JSON.stringify({sheet, row}),
-        headers:{'Content-Type':'application/json'}
-      });
-      const j = await r.json();
-      ok = j.status === 'success';
-    } catch(e) { ok = false; }
-  } else {
-    ok = true;
+  if(btn) {
+    btn.disabled = true;
+    const btxt = btn.querySelector('.btxt');
+    const spn = btn.querySelector('.spn');
+    if(btxt) btxt.style.display = 'none';
+    if(spn) spn.style.display = 'inline';
   }
 
-  btn.disabled = false;
-  btn.querySelector('.btxt').style.display = '';
-  btn.querySelector('.spn').style.display = 'none';
-
-  // Always save to phone first
-  const timestamp = new Date().toLocaleString('en-SA',{timeZone:'Asia/Riyadh',hour12:false});
+  // ── Save to phone FIRST (always) ──
+  // Build platform-independent Riyadh timestamp: DD/MM/YYYY, HH:MM:SS
+  const timestamp = saTimestamp(new Date());
   const entry = {
     id: Date.now(),
     type: sheet,
@@ -2709,22 +3357,93 @@ async function doSubmit(type) {
     remote: false,
     row: row
   };
-
   histData.unshift(entry);
   localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
   renderHistory();
 
-  if (ok && sheetsUrl) {
+  // ── Send to Firebase Firestore (parallel with Sheets) ──
+  let cloudOk = false;
+  let cloudPromise = null;
+  if (dalCloud.enabled) {
+    cloudPromise = dalCloud.saveEntry(sheet, row, {
+      timestamp: timestamp,
+      proj: entry.proj,
+      truck: entry.truck,
+      trailer: entry.trailer,
+      driver: entry.driver,
+      icon: entry.icon
+    }).then(res => {
+      cloudOk = res.ok;
+      if (res.ok) {
+        entry.cloudId = res.id;
+        entry.remote = true;
+        histData[0] = entry;
+        localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
+      }
+      return res;
+    }).catch(e => { console.warn('Cloud save err:', e); return {ok:false}; });
+  }
+
+  // ── Send to Google Sheets ──
+  let ok = false;
+  if (sheetsUrl) {
+    try {
+      const payload = JSON.stringify({sheet: sheet, row: row});
+      // Try with cors first, fallback to no-cors
+      try {
+        const resp = await fetch(sheetsUrl, {
+          method: 'POST',
+          mode: 'cors',
+          body: payload,
+          headers: {'Content-Type': 'text/plain;charset=utf-8'}
+        });
+        ok = resp.ok || resp.status === 0 || resp.type === 'opaque';
+      } catch(e1) {
+        // CORS blocked — try no-cors (opaque response = assume success)
+        await fetch(sheetsUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: payload,
+          headers: {'Content-Type': 'text/plain'}
+        });
+        ok = true;
+      }
+    } catch(err) {
+      console.error('Sheets send error:', err);
+      ok = false;
+    }
+  }
+
+  if(btn) {
+    btn.disabled = false;
+    const btxt = btn.querySelector('.btxt');
+    const spn = btn.querySelector('.spn');
+    if(btxt) btxt.style.display = '';
+    if(spn) spn.style.display = 'none';
+  }
+
+  // Wait for cloud save (with timeout) so we have an accurate status
+  if (cloudPromise) {
+    try {
+      await Promise.race([cloudPromise, new Promise(r => setTimeout(r, 5000))]);
+    } catch(e) {}
+  }
+
+  // Compose status message based on what worked
+  const anyRemote = ok || cloudOk;
+  if (anyRemote) {
     entry.remote = true;
     histData[0] = entry;
     localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
     renderHistory();
-    showToast('✅ Google Sheet + Phone mein save! · حُفظ!');
-  } else if (!sheetsUrl) {
-    showToast('💾 Phone mein save! Connect Sheet for cloud sync');
+    if (cloudOk && ok)         showToast('✅ Cloud + Sheet mein save! · حُفظ في السحابة والجداول');
+    else if (cloudOk)          showToast('☁️ Firebase mein save! · حُفظ في السحابة');
+    else                       showToast('✅ Google Sheet mein save! · تم الحفظ في الجداول');
+  } else if (!sheetsUrl && !dalCloud.enabled) {
+    showToast('💾 Phone mein save! Backend connect karo · احفظ في الهاتف!');
     queueForSync(entry);
   } else {
-    showToast('💾 Phone mein save! (Sheet error — will sync later)');
+    showToast('⚠️ Send fail — Phone mein save, baad mein sync hoga · فشل الإرسال');
     queueForSync(entry);
   }
 }
@@ -2809,6 +3528,10 @@ function switchPage(id, btn) {
   document.querySelectorAll('.bb').forEach(b => b.classList.remove('act'));
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('act');
+  // Refresh Firebase status when Setup tab opens
+  if (id === 'setup' && typeof refreshCloudStatus === 'function') {
+    setTimeout(refreshCloudStatus, 50);
+  }
 }
 
 // ════ TOAST ════
@@ -3012,18 +3735,71 @@ function exportCSV() {
 let dashProj = null;
 let dashFiltered = [];
 let dashFilter = 'today';
+let _cloudUnsub = null; // active Firestore subscription
+
+// Start a real-time listener that mirrors Firestore entries into histData
+function startCloudSync() {
+  if (!dalCloud.enabled) return;
+  if (_cloudUnsub) { try { _cloudUnsub(); } catch(e){} _cloudUnsub = null; }
+  _cloudUnsub = dalCloud.subscribe(cloudEntries => {
+    // Merge cloud entries with local histData (cloud id wins on dup)
+    const cloudIds = new Set();
+    const merged = [];
+    cloudEntries.forEach(c => {
+      cloudIds.add(c.id);
+      // Reconstruct entry shape matching local histData
+      const meta = c.meta || {};
+      merged.push({
+        id: c.id,
+        cloudId: c.id,
+        type: c.sheet,
+        sheet: c.sheet,
+        icon: meta.icon || '📄',
+        proj: meta.proj || '—',
+        truck: meta.truck || '—',
+        trailer: meta.trailer || '—',
+        driver: meta.driver || '—',
+        time: meta.timestamp || c.clientTime || '',
+        remote: true,
+        row: c.row || []
+      });
+    });
+    // Keep local-only entries (queued, never made it to cloud yet)
+    const localOnly = histData.filter(e => !e.cloudId);
+    histData = merged.concat(localOnly).slice(0, 300);
+    localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
+    if (typeof renderHistory === 'function') renderHistory();
+    if (currentRole === 'manager' && typeof refreshDashboard === 'function') {
+      refreshDashboard();
+    }
+  }, 200);
+  console.log('[dalCloud] 📡 Real-time sync active');
+}
+
+function stopCloudSync() {
+  if (_cloudUnsub) { try { _cloudUnsub(); } catch(e){} _cloudUnsub = null; }
+}
 
 function refreshDashboard() {
   applyDashFilter();
   renderDashStats();
   renderDashAlerts();
-  const now = new Date().toLocaleString('en-SA',{timeZone:'Asia/Riyadh',hour12:false});
   const el = document.getElementById('dashLastUpdate');
-  if(el) el.textContent = '📅 ' + getDashFilterLabel() + ' · ' + dashFiltered.length + ' records';
+  if(el) {
+    const cloudIcon = dalCloud.enabled ? ' ☁️' : '';
+    el.textContent = '📅 ' + getDashFilterLabel() + ' · ' + dashFiltered.length + ' records' + cloudIcon;
+  }
   // Set today date in inputs if empty
   const td = new Date().toISOString().split('T')[0];
   const f = document.getElementById('dfFrom'); if(f && !f.value) f.value = td;
   const t = document.getElementById('dfTo');   if(t && !t.value) t.value = td;
+  // Set report date inputs to today
+  const rf = document.getElementById('repFrom'); if(rf && !rf.value) rf.value = td;
+  const rt = document.getElementById('repTo');   if(rt && !rt.value) rt.value = td;
+  // Refresh reports section
+  if (typeof refreshReports === 'function') refreshReports();
+  // Ensure cloud sync is running for manager
+  if (dalCloud.enabled && !_cloudUnsub) startCloudSync();
 }
 
 function getDashFilterLabel() {
@@ -3047,11 +3823,14 @@ function setDateFilter(type) {
 
 function applyDashFilter() {
   const now = new Date();
-  const todaySA  = now.toLocaleDateString('en-SA',{timeZone:'Asia/Riyadh'});
+  const todaySA = saDate(now);
   const yd = new Date(now); yd.setDate(yd.getDate()-1);
-  const ydSA = yd.toLocaleDateString('en-SA',{timeZone:'Asia/Riyadh'});
-  const wk = new Date(now); wk.setDate(wk.getDate()-7);
-  const mo = new Date(now.getFullYear(), now.getMonth(), 1);
+  const ydSA = saDate(yd);
+
+  // End of today = 23:59:59 so today's records are included in range
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  const wkStart  = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0);
+  const moStart  = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
 
   switch(dashFilter) {
     case 'today':
@@ -3059,14 +3838,21 @@ function applyDashFilter() {
     case 'yesterday':
       dashFiltered = histData.filter(h => tsMatch(h.time, ydSA)); break;
     case 'week':
-      dashFiltered = histData.filter(h => { const d=tsDate(h.time); return d&&d>=wk; }); break;
+      dashFiltered = histData.filter(h => {
+        const d = tsDate(h.time);
+        return d && d >= wkStart && d <= todayEnd;
+      }); break;
     case 'month':
-      dashFiltered = histData.filter(h => { const d=tsDate(h.time); return d&&d>=mo; }); break;
+      dashFiltered = histData.filter(h => {
+        const d = tsDate(h.time);
+        return d && d >= moStart && d <= todayEnd;
+      }); break;
     case 'custom':
       const fr = document.getElementById('dfFrom')?.value;
       const to = document.getElementById('dfTo')?.value;
       if(fr && to) {
-        const fd=new Date(fr), td2=new Date(to); td2.setHours(23,59,59);
+        const fd = new Date(fr + 'T00:00:00');
+        const td2 = new Date(to + 'T23:59:59');
         dashFiltered = histData.filter(h => { const d=tsDate(h.time); return d&&d>=fd&&d<=td2; });
       } break;
     default:
@@ -3074,19 +3860,99 @@ function applyDashFilter() {
   }
 }
 
+// ═══ DATE HELPERS — Riyadh timezone, platform-independent ═══
+
+// Normalize Arabic-Indic & Persian digits → Western digits, strip RTL/LTR marks
+// Phones with Saudi locale often emit ١٢/٠٥/٢٠٢٦ with embedded \u200F marks
+function normDigits(s) {
+  if(!s) return '';
+  return String(s)
+    // Arabic-Indic digits ٠-٩ (U+0660 to U+0669)
+    .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+    // Persian/Extended Arabic-Indic digits ۰-۹ (U+06F0 to U+06F9)
+    .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
+    // Strip invisible directional marks (LRM, RLM, LRE, RLE, PDF, LRO, RLO, ALM)
+    .replace(/[\u200E\u200F\u202A-\u202E\u061C]/g, '')
+    .trim();
+}
+
+// Returns DD/MM/YYYY for given Date (in Asia/Riyadh tz), Western digits
+function saDate(d) {
+  if(!d) return '';
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Riyadh',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      numberingSystem: 'latn'
+    }).formatToParts(d);
+    const get = t => parts.find(p => p.type === t)?.value || '';
+    return normDigits(get('day') + '/' + get('month') + '/' + get('year'));
+  } catch(e) {
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    return dd + '/' + mm + '/' + d.getFullYear();
+  }
+}
+// Returns DD/MM/YYYY, HH:MM:SS for given Date (in Asia/Riyadh tz), Western digits
+function saTimestamp(d) {
+  if(!d) return '';
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Riyadh',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false,
+      numberingSystem: 'latn'
+    }).formatToParts(d);
+    const get = t => parts.find(p => p.type === t)?.value || '';
+    let hh = get('hour'); if(hh === '24') hh = '00';
+    const out = get('day') + '/' + get('month') + '/' + get('year') + ', ' +
+                hh + ':' + get('minute') + ':' + get('second');
+    return normDigits(out);
+  } catch(e) {
+    return saDate(d) + ', ' +
+      String(d.getHours()).padStart(2,'0') + ':' +
+      String(d.getMinutes()).padStart(2,'0') + ':' +
+      String(d.getSeconds()).padStart(2,'0');
+  }
+}
+
 function tsDate(ts) {
   if(!ts) return null;
   try {
-    const m = ts.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if(m) return new Date(+m[3], +m[2]-1, +m[1]);
-    return new Date(ts);
+    // Normalize first — handles legacy Arabic-Indic / RTL-marked timestamps
+    const clean = normDigits(ts);
+    // Our saved format = DD/MM/YYYY (day first). Legacy data may be M/D/YYYY.
+    const m = clean.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m) {
+      const a = +m[1], b = +m[2], year = +m[3];
+      let day, month;
+      if(a > 12)       { day = a; month = b; }   // unambiguous DD/MM
+      else if(b > 12)  { day = b; month = a; }   // unambiguous MM/DD (legacy)
+      else             { day = a; month = b; }   // default DD/MM (our format)
+      return new Date(year, month - 1, day);
+    }
+    // ISO-like fallback YYYY-MM-DD
+    const iso = clean.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if(iso) return new Date(+iso[1], +iso[2]-1, +iso[3]);
+    const fallback = new Date(clean);
+    return isNaN(fallback) ? null : fallback;
   } catch(e) { return null; }
 }
 
 function tsMatch(ts, dateStr) {
-  const d = tsDate(ts);
-  if(!d) return false;
-  return d.toLocaleDateString('en-SA',{timeZone:'Asia/Riyadh'}) === dateStr;
+  if(!ts || !dateStr) return false;
+  try {
+    const cleanTs = normDigits(ts);
+    const cleanTarget = normDigits(dateStr);
+    // Direct raw match first
+    const rawDate = (cleanTs.split(',')[0] || '').trim();
+    if(rawDate === cleanTarget) return true;
+    // Fallback: parse timestamp and compare via saDate
+    const d = tsDate(ts);
+    if(!d) return false;
+    return saDate(d) === cleanTarget;
+  } catch(e) { return false; }
 }
 
 function renderDashStats() {
@@ -3254,6 +4120,340 @@ function doDashExport(data, name) {
   a.click(); showToast('📥 Exported!');
 }
 
+// ════════════════════════════════════════════════════════════
+// 📊 REPORTS SYSTEM — Daily/Monthly Analytics
+// ════════════════════════════════════════════════════════════
+let reportPeriod = 'today';
+let reportGroup = 'driver';
+let reportCustomFrom = null;
+let reportCustomTo = null;
+let reportData = [];
+let reportTrendChartInstance = null;
+let reportTypeChartInstance = null;
+
+// Period selector
+function setReportPeriod(period, btn) {
+  reportPeriod = period;
+  reportCustomFrom = null;
+  reportCustomTo = null;
+  document.querySelectorAll('.rep-period').forEach(b => {
+    b.style.background = 'var(--bg)';
+    b.style.color = 'var(--muted)';
+    b.style.border = '1.5px solid var(--border)';
+    b.classList.remove('sel');
+  });
+  if (btn) {
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#000';
+    btn.style.border = 'none';
+    btn.classList.add('sel');
+  }
+  refreshReports();
+}
+
+// Group selector
+function setReportGroup(group, btn) {
+  reportGroup = group;
+  document.querySelectorAll('.rep-group').forEach(b => {
+    b.style.background = 'var(--bg)';
+    b.style.color = 'var(--muted)';
+    b.style.border = '1.5px solid var(--border)';
+    b.classList.remove('sel');
+  });
+  if (btn) {
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#000';
+    btn.style.border = 'none';
+    btn.classList.add('sel');
+  }
+  const labels = {driver:'🚛 By Driver',foreman:'🏭 By Foreman',tireman:'🛞 By Tireman',truck:'🚚 By Truck',project:'📦 By Project'};
+  const lbl = document.getElementById('reportGroupLabel');
+  if (lbl) lbl.textContent = labels[group] || '👥 Group';
+  refreshReports();
+}
+
+function applyReportCustomRange() {
+  const f = document.getElementById('repFrom').value;
+  const t = document.getElementById('repTo').value;
+  if (!f || !t) { showToast('❌ Date range chunna!', true); return; }
+  reportCustomFrom = f;
+  reportCustomTo = t;
+  reportPeriod = 'custom';
+  document.querySelectorAll('.rep-period').forEach(b => {
+    b.style.background = 'var(--bg)';
+    b.style.color = 'var(--muted)';
+    b.style.border = '1.5px solid var(--border)';
+    b.classList.remove('sel');
+  });
+  refreshReports();
+}
+
+// Get filtered data based on period
+function getFilteredReportData() {
+  const now = new Date();
+  const today = saDate(now);
+  const yd = new Date(now); yd.setDate(yd.getDate()-1);
+  const yesterday = saDate(yd);
+
+  return histData.filter(h => {
+    if (!h.time) return false;
+    const d = tsDate(h.time);
+    if (!d) return false;
+    const dateStr = saDate(d);
+
+    if (reportPeriod === 'today')      return dateStr === today;
+    if (reportPeriod === 'yesterday')  return dateStr === yesterday;
+    if (reportPeriod === 'week') {
+      const wkAgo = new Date(now); wkAgo.setDate(wkAgo.getDate()-7);
+      return d >= wkAgo && d <= now;
+    }
+    if (reportPeriod === 'month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    if (reportPeriod === 'custom') {
+      if (!reportCustomFrom || !reportCustomTo) return true;
+      const f = new Date(reportCustomFrom); f.setHours(0,0,0,0);
+      const t = new Date(reportCustomTo); t.setHours(23,59,59,999);
+      return d >= f && d <= t;
+    }
+    return true; // 'all'
+  });
+}
+
+// Get group key for an entry based on selected grouping
+function getReportGroupKey(entry) {
+  if (reportGroup === 'driver') {
+    // Only driver-related entries
+    if (['Checklist','Maintenance','Breakdown','Accident'].includes(entry.type)) {
+      return entry.driver || '—';
+    }
+    return null;
+  }
+  if (reportGroup === 'foreman') {
+    if (entry.type === 'Workshop') return entry.driver || entry.row?.[5] || '—'; // mechanic field
+    return null;
+  }
+  if (reportGroup === 'tireman') {
+    if (entry.type === 'TireRequest' || entry.type === 'Tire') return entry.driver || entry.truck || '—';
+    return null;
+  }
+  if (reportGroup === 'truck')   return entry.truck || '—';
+  if (reportGroup === 'project') return entry.proj || '—';
+  return null;
+}
+
+// Main refresh function
+function refreshReports() {
+  reportData = getFilteredReportData();
+  const countEl = document.getElementById('reportRecordCount');
+  if (countEl) countEl.textContent = reportData.length + ' records';
+  renderReportStats();
+  renderReportTrend();
+  renderReportTypeChart();
+  renderReportGroupList();
+}
+
+// Summary stat cards
+function renderReportStats() {
+  const el = document.getElementById('reportStats');
+  if (!el) return;
+  const total = reportData.length;
+  const breakdowns = reportData.filter(h => h.type === 'Breakdown').length;
+  const workshop  = reportData.filter(h => h.type === 'Workshop').length;
+  const checklists = reportData.filter(h => h.type === 'Checklist').length;
+  const accidents = reportData.filter(h => h.type === 'Accident').length;
+  const tires     = reportData.filter(h => h.type === 'TireRequest' || h.type === 'Tire').length;
+  const outside   = reportData.filter(h => h.type === 'OutsideRepair' || h.type === 'JobCard').length;
+
+  el.innerHTML =
+    statCard('📋', 'Total', total, '#3b82f6') +
+    statCard('✅', 'Checklists', checklists, '#10b981') +
+    statCard('🏭', 'Workshop', workshop, '#a78bfa') +
+    statCard('🚨', 'Breakdowns', breakdowns, '#ef4444') +
+    statCard('💥', 'Accidents', accidents, '#f59e0b') +
+    statCard('🛞', 'Tire', tires, '#fb923c') +
+    statCard('🏗️', 'Outside', outside, '#10b981');
+}
+function statCard(icon, label, count, color) {
+  return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">'
+       + '<div style="font-size:11px;margin-bottom:2px;">' + icon + '</div>'
+       + '<div style="font-size:18px;font-weight:700;color:' + color + ';">' + count + '</div>'
+       + '<div style="font-size:9px;color:var(--muted);">' + label + '</div>'
+       + '</div>';
+}
+
+// Daily trend chart (line)
+function renderReportTrend() {
+  const canvas = document.getElementById('reportTrendChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  // Group by date
+  const byDate = {};
+  reportData.forEach(h => {
+    const d = tsDate(h.time);
+    if (!d) return;
+    const key = saDate(d);
+    byDate[key] = (byDate[key] || 0) + 1;
+  });
+  // Sort dates ASC
+  const dates = Object.keys(byDate).sort((a,b) => {
+    const [da,ma,ya] = a.split('/').map(Number);
+    const [db,mb,yb] = b.split('/').map(Number);
+    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
+  });
+  const counts = dates.map(d => byDate[d]);
+  // Shorter labels (DD/MM)
+  const labels = dates.map(d => d.substring(0,5));
+
+  if (reportTrendChartInstance) reportTrendChartInstance.destroy();
+  reportTrendChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Entries',
+        data: counts,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.15)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: '#a78bfa'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(148,163,184,0.1)' } },
+        y: { beginAtZero: true, ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { color: 'rgba(148,163,184,0.1)' } }
+      }
+    }
+  });
+}
+
+// Type distribution chart (doughnut)
+function renderReportTypeChart() {
+  const canvas = document.getElementById('reportTypeChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const typeCount = {};
+  reportData.forEach(h => {
+    const t = h.type || 'Other';
+    typeCount[t] = (typeCount[t] || 0) + 1;
+  });
+  const labels = Object.keys(typeCount);
+  const data = labels.map(l => typeCount[l]);
+  const colors = ['#3b82f6','#10b981','#ef4444','#f59e0b','#a78bfa','#fb923c','#06b6d4','#ec4899'];
+
+  if (reportTypeChartInstance) reportTypeChartInstance.destroy();
+  if (!labels.length) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data', canvas.width/2, canvas.height/2);
+    return;
+  }
+  reportTypeChartInstance = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{ data: data, backgroundColor: colors.slice(0, labels.length), borderColor: 'var(--bg)', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 }, padding: 8, boxWidth: 12 } }
+      }
+    }
+  });
+}
+
+// Detailed group list
+function renderReportGroupList() {
+  const el = document.getElementById('reportGroupList');
+  if (!el) return;
+
+  const groups = {};
+  reportData.forEach(h => {
+    const key = getReportGroupKey(h);
+    if (!key) return;
+    if (!groups[key]) groups[key] = { total:0, types:{}, entries:[] };
+    groups[key].total++;
+    const t = h.type || 'Other';
+    groups[key].types[t] = (groups[key].types[t] || 0) + 1;
+    groups[key].entries.push(h);
+  });
+
+  const sortedGroups = Object.entries(groups).sort((a,b) => b[1].total - a[1].total);
+  if (!sortedGroups.length) {
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">No data for this filter</div>';
+    return;
+  }
+
+  el.innerHTML = sortedGroups.map(([name, info]) => {
+    const typeBadges = Object.entries(info.types).map(([t,c]) => {
+      const colors = {Checklist:'#10b981',Maintenance:'#3b82f6',Breakdown:'#ef4444',Accident:'#f59e0b',Workshop:'#a78bfa',TireRequest:'#fb923c',Tire:'#fb923c',OutsideRepair:'#06b6d4',JobCard:'#06b6d4'};
+      const c2 = colors[t] || '#94a3b8';
+      return '<span style="background:' + c2 + '22;color:' + c2 + ';padding:2px 6px;border-radius:8px;font-size:9px;font-weight:600;margin-right:3px;">' + t + ': ' + c + '</span>';
+    }).join('');
+    return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:6px;">'
+         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+         +   '<div style="font-size:12px;font-weight:700;color:var(--text);">' + name + '</div>'
+         +   '<div style="font-size:11px;font-weight:700;color:#c084fc;">' + info.total + '</div>'
+         + '</div>'
+         + '<div style="display:flex;flex-wrap:wrap;gap:3px;">' + typeBadges + '</div>'
+         + '</div>';
+  }).join('');
+}
+
+// Export summary CSV
+function exportReportCSV() {
+  if (!reportData.length) { showToast('❌ No data!', true); return; }
+  const groups = {};
+  reportData.forEach(h => {
+    const key = getReportGroupKey(h);
+    if (!key) return;
+    if (!groups[key]) groups[key] = { total:0, types:{} };
+    groups[key].total++;
+    const t = h.type || 'Other';
+    groups[key].types[t] = (groups[key].types[t] || 0) + 1;
+  });
+  const allTypes = ['Checklist','Maintenance','Breakdown','Accident','Workshop','TireRequest','OutsideRepair'];
+  const rows = [['Name','Total', ...allTypes]];
+  Object.entries(groups).sort((a,b)=>b[1].total - a[1].total).forEach(([name, info]) => {
+    rows.push([name, info.total, ...allTypes.map(t => info.types[t] || 0)]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c || '').replace(/"/g,'""') + '"').join(',')).join('\n');
+  downloadCSV(csv, 'DAL_Report_Summary_' + reportPeriod + '_' + new Date().toISOString().split('T')[0]);
+}
+
+// Export detailed CSV (every entry)
+function exportReportDetailCSV() {
+  if (!reportData.length) { showToast('❌ No data!', true); return; }
+  const rows = [['Time','Type','Project','Truck','Trailer','Driver','Synced','Data']];
+  reportData.forEach(h => {
+    const data = Array.isArray(h.row) ? h.row.join(' | ') : String(h.row || '');
+    rows.push([h.time||'', h.type||'', h.proj||'', h.truck||'', h.trailer||'', h.driver||'', h.remote?'Yes':'No', data]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c || '').replace(/"/g,'""') + '"').join(',')).join('\n');
+  downloadCSV(csv, 'DAL_Report_Detail_' + reportPeriod + '_' + new Date().toISOString().split('T')[0]);
+}
+
+function downloadCSV(csv, name) {
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + '.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  showToast('📥 Exported! Excel mein khole.');
+}
 
 
 // ════ ROLE SYSTEM ════
@@ -3283,7 +4483,90 @@ const ROLE_CONFIG = {
 
 let currentRole = null;
 
+// ════ PIN SYSTEM ════
+// Change PINs yahan se:
+const ROLE_PINS = {
+  driver:      '1111',
+  coordinator: '2222',
+  foreman:     '3333',
+  tireman:     '4444',
+  manager:     '9999'
+};
+
+let pinBuffer = '';
+let pinTargetRole = '';
+
 function selectRole(role) {
+  // Show PIN overlay first
+  pinTargetRole = role;
+  pinBuffer = '';
+  const cfg = ROLE_CONFIG[role];
+  document.getElementById('pinRoleIcon').textContent = cfg.icon;
+  document.getElementById('pinRoleName').textContent = cfg.name + ' · ' + cfg.nameAr;
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  document.getElementById('pinOverlay').classList.add('show');
+}
+
+function pinKey(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(checkPin, 120);
+  }
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+function pinClear() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+function pinCancel() {
+  document.getElementById('pinOverlay').classList.remove('show');
+  pinBuffer = '';
+  pinTargetRole = '';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd' + i);
+    dot.classList.remove('filled', 'error');
+    if (i < pinBuffer.length) dot.classList.add('filled');
+  }
+}
+
+function checkPin() {
+  if (pinBuffer === ROLE_PINS[pinTargetRole]) {
+    // PIN correct
+    document.getElementById('pinOverlay').classList.remove('show');
+    enterRole(pinTargetRole);
+  } else {
+    // PIN wrong — shake dots red
+    for (let i = 0; i < 4; i++) {
+      const dot = document.getElementById('pd' + i);
+      dot.classList.remove('filled');
+      dot.classList.add('error');
+    }
+    document.getElementById('pinError').textContent = '❌ Galat PIN! Wrong PIN! رمز خاطئ';
+    setTimeout(() => {
+      pinBuffer = '';
+      updatePinDots();
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('pd' + i).classList.remove('error');
+      }
+    }, 900);
+  }
+}
+
+function enterRole(role) {
   currentRole = role;
   const cfg = ROLE_CONFIG[role];
   document.getElementById('loginScreen').style.display = 'none';
@@ -3339,10 +4622,173 @@ document.addEventListener('DOMContentLoaded', function() {
   if(badge) badge.onclick = function() {
     if(currentRole && confirm('Role change karna hai?')) logoutRole();
   };
+  // Build inspection checklist for Foreman tab
+  if (typeof buildInspection === 'function') buildInspection();
+  // Initialize Firebase cloud status indicator + start sync if connected
+  if (typeof refreshCloudStatus === 'function') setTimeout(refreshCloudStatus, 300);
+  if (typeof startCloudSync === 'function') {
+    setTimeout(() => { if (dalCloud.enabled) startCloudSync(); }, 800);
+  }
+  // One-time migration: normalize legacy timestamps (Arabic-Indic digits,
+  // RTL marks, MM/DD format) to clean DD/MM/YYYY Western digits
+  try {
+    if (Array.isArray(histData) && histData.length) {
+      let changed = 0;
+      histData.forEach(e => {
+        if (!e || !e.time) return;
+        const original = e.time;
+        const normalized = normDigits(original);
+        if (normalized !== original) { e.time = normalized; changed++; }
+        const d = tsDate(e.time);
+        if (d) {
+          const timePart = (e.time.split(',')[1] || '').trim();
+          const canon = saDate(d) + (timePart ? ', ' + timePart : '');
+          if (canon !== e.time) { e.time = canon; changed++; }
+        }
+      });
+      if (changed > 0) {
+        localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
+        console.log('[Migration] Normalized ' + changed + ' timestamp(s)');
+      }
+    }
+  } catch(err) { console.warn('Migration error:', err); }
 });
 
 
 // ════ COPY SCRIPT ════
+// ════ FIREBASE SETUP UI FUNCTIONS ════
+function refreshCloudStatus() {
+  const el = document.getElementById('cloudStatus');
+  if (!el) return;
+  if (dalCloud.enabled && dalCloud.config) {
+    el.innerHTML = '<span style="color:#10b981;">● Connected</span> · ' + dalCloud.config.projectId;
+  } else if (localStorage.getItem('dalFirebaseConfig')) {
+    el.innerHTML = '<span style="color:#f59e0b;">● Config saved, waiting...</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--muted);">○ Not connected</span>';
+  }
+  // Pre-fill inputs from saved config
+  try {
+    const cfg = JSON.parse(localStorage.getItem('dalFirebaseConfig') || '{}');
+    ['fbApiKey','fbAuthDomain','fbProjectId','fbStorageBucket','fbAppId'].forEach(id => {
+      const inp = document.getElementById(id);
+      if (!inp) return;
+      const key = id.replace('fb','');
+      const keyLower = key.charAt(0).toLowerCase() + key.slice(1);
+      if (cfg[keyLower] && !inp.value) inp.value = cfg[keyLower];
+    });
+  } catch(e) {}
+}
+
+function saveFirebaseConfig() {
+  const apiKey        = document.getElementById('fbApiKey').value.trim();
+  const authDomain    = document.getElementById('fbAuthDomain').value.trim();
+  const projectId     = document.getElementById('fbProjectId').value.trim();
+  const storageBucket = document.getElementById('fbStorageBucket').value.trim();
+  const appId         = document.getElementById('fbAppId').value.trim();
+
+  if (!apiKey || !projectId) {
+    alert('❌ apiKey aur projectId zaroori hain!\n\nDono fields fill karo.');
+    return;
+  }
+
+  // Check Firebase libs loaded
+  if (!window.dalFB || !window.dalFB.ready) {
+    alert('⏳ Firebase libraries abhi load nahi hui!\n\n• Internet check karo\n• Page reload karo (pull down)\n• 5 sec wait karke phir try karo');
+    return;
+  }
+
+  const cfg = {
+    apiKey, authDomain: authDomain || (projectId + '.firebaseapp.com'),
+    projectId,
+    storageBucket: storageBucket || (projectId + '.appspot.com'),
+    appId: appId || ''
+  };
+  try {
+    const ok = dalCloud.setConfig(cfg);
+    if (ok) {
+      alert('✅ Firebase connect ho gaya!\n\nProject: ' + projectId + '\n\nAb "Test" button dabao confirm karne ke liye.');
+      setTimeout(() => {
+        refreshCloudStatus();
+        startCloudSync();
+      }, 600);
+    } else {
+      alert('⚠️ Config save ho gayi, lekin init nahi hua.\n\n5 sec wait karke "Test" dabao.');
+      setTimeout(refreshCloudStatus, 1500);
+    }
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+async function testFirebaseConnection() {
+  // Build detailed diagnostic report
+  const diag = [];
+  diag.push('🔍 Firebase Diagnostic:');
+  diag.push('1. Module script ran: ' + (window.dalFB_moduleStarted ? '✅' : '❌'));
+  diag.push('2. Firebase libs loaded: ' + (window.dalFB && window.dalFB.ready ? '✅' : '❌'));
+  if (window.dalFB_error) diag.push('   Error: ' + window.dalFB_error);
+  diag.push('3. dalCloud enabled: ' + (dalCloud.enabled ? '✅' : '❌'));
+  diag.push('4. Config present: ' + (dalCloud.config ? '✅ ' + dalCloud.config.projectId : '❌'));
+  diag.push('5. DB instance: ' + (dalCloud.db ? '✅' : '❌'));
+  diag.push('6. Online: ' + (navigator.onLine ? '✅' : '❌'));
+  diag.push('7. URL scheme: ' + window.location.protocol);
+
+  console.log(diag.join('\n'));
+
+  // Detect content:// scheme issue (Chrome Android opens downloads in restricted mode)
+  if (window.location.protocol === 'content:' && (!window.dalFB || !window.dalFB.ready)) {
+    alert('❌ PROBLEM MIL GAYA!\n\nYe file content:// se khuli hai (Downloads se).\n\nFix:\n1. File ko local browser se kholo (file://)\n2. Ya app ko web pe host karo (jaise Netlify ya GitHub Pages — main bata sakta hu kaise)\n3. Ya offline-first folder structure use karo\n\nDetails:\n' + diag.join('\n'));
+    return;
+  }
+
+  if (!window.dalFB || !window.dalFB.ready) {
+    const errExtra = window.dalFB_error ? '\n\nLoad Error:\n' + window.dalFB_error : '';
+    alert('❌ Firebase libraries load nahi hui!\n\nKaaran:\n• Internet connection check karo\n• Page reload karo (pull down)\n• Browser cache clear karo' + errExtra + '\n\nDetails:\n' + diag.join('\n'));
+    return;
+  }
+  if (!dalCloud.enabled) {
+    alert('❌ Firebase connected nahi hai!\n\nPehle "Connect Firebase" button dabao.\n\nDetails:\n' + diag.join('\n'));
+    return;
+  }
+  if (!navigator.onLine) {
+    alert('❌ Internet nahi hai!\n\nWiFi ya mobile data check karo.\n\nDetails:\n' + diag.join('\n'));
+    return;
+  }
+
+  // Show testing status
+  showToast('🧪 Testing... ' + dalCloud.config.projectId);
+  try {
+    console.log('[Test] Attempting saveEntry to Firestore...');
+    const testRes = await dalCloud.saveEntry('_test', ['ping'], { test: true, ts: new Date().toISOString() });
+    console.log('[Test] Result:', testRes);
+    if (testRes.ok) {
+      const msg = '✅ Test PASS!\n\nDocument ID: ' + testRes.id + '\n\nProject: ' + dalCloud.config.projectId + '\n\nFirebase Console mein Firestore Database → Data tab kholo. "entries" collection dikhega.';
+      alert(msg);
+      showToast('✅ Test pass! ID: ' + testRes.id.slice(0,8));
+    } else {
+      const errMsg = '❌ Test FAIL!\n\nReason: ' + (testRes.reason || 'unknown') + '\n\nCommon causes:\n• Firestore Rules block kar rahe hain (production mode)\n• Test mode 30 din expire ho gaya\n• Project ID wrong hai\n\nDetails:\n' + diag.join('\n');
+      alert(errMsg);
+    }
+  } catch(e) {
+    console.error('[Test] Error:', e);
+    const errMsg = '❌ Test ERROR!\n\n' + (e.message || e.toString()) + '\n\nDetails:\n' + diag.join('\n');
+    alert(errMsg);
+  }
+}
+
+function clearFirebaseConfig() {
+  if (!confirm('Firebase disconnect karna hai? Data Firebase mein safe rahega, sirf is phone se disconnect hoga.')) return;
+  dalCloud.clearConfig();
+  ['fbApiKey','fbAuthDomain','fbProjectId','fbStorageBucket','fbAppId'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) inp.value = '';
+  });
+  stopCloudSync();
+  refreshCloudStatus();
+  showToast('🔌 Firebase disconnected');
+}
+
 function copyCode() {
   navigator.clipboard.writeText(document.getElementById('scriptTxt').textContent).then(()=>showToast('📋 Script copied!'));
 }
@@ -3428,11 +4874,11 @@ async function admSyncToSheets() {
 async function admLoadFromSheets() {
   if(!sheetsUrl) return;
   try {
-    showToast('⏳ Loading fleet from Google Sheets...');
-    const r = await fetch(sheetsUrl + '?action=fleet');
-    const j = await r.json();
-    if(j.status==='ok' && j.fleet) {
-      // Merge sheet data into FLEET
+    const r = await fetch(sheetsUrl + '?action=fleet', {mode:'cors'});
+    const txt = await r.text();
+    let j;
+    try { j = JSON.parse(txt); } catch(e) { return; } // Not JSON = script doesn't support GET fleet yet
+    if(j && j.status==='ok' && j.fleet) {
       Object.keys(j.fleet).forEach(proj => { FLEET[proj] = j.fleet[proj]; });
       if(j.trailers) {
         j.trailers.forEach(t => { if(t && !TRAILERS.includes(t)) TRAILERS.push(t); });
@@ -3441,8 +4887,9 @@ async function admLoadFromSheets() {
       admRenderAll();
       showToast('✅ Fleet data loaded from Google Sheets!');
     }
+    // If status is not ok, silently use local data — no error toast
   } catch(e) {
-    showToast('⚠️ Could not load from Sheets — using local data');
+    // Network error — silently use local data, no error shown on load
   }
 }
 
@@ -4127,6 +5574,13 @@ document.addEventListener('DOMContentLoaded', function() {
   admRenderAll();
   if(sheetsUrl) setTimeout(admLoadFromSheets, 1000);
   setLang(currentLang);
+  // Init sheets URL
+  if (sheetsUrl) {
+    const inp = document.getElementById('sheetsUrl');
+    if (inp) inp.value = sheetsUrl;
+    setConnected();
+  }
+  renderHistory();
 });
 </script>
 </body>
