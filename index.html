@@ -17,13 +17,13 @@
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js');
     const {
       getFirestore, collection, addDoc, getDocs, query,
-      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc
     } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
 
     window.dalFB = {
       initializeApp, getApps,
       getFirestore, collection, addDoc, getDocs, query,
-      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp,
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc,
       ready: true
     };
     console.log('[Firebase] ✅ SDK loaded successfully');
@@ -1068,6 +1068,15 @@
 
 <!-- ════════════ PAGE: FORMS ════════════ -->
 <div class="page active" id="page-forms">
+
+  <!-- ⚠️ FIREBASE NOT CONNECTED WARNING -->
+  <div id="fbWarnBanner" style="display:none;background:rgba(239,68,68,.12);
+    border:1.5px solid rgba(239,68,68,.5);border-radius:10px;padding:11px 13px;
+    margin-bottom:12px;font-size:11px;color:#fca5a5;line-height:1.5;">
+    <b>⚠️ Cloud NOT Connected · غير متصل بالسحابة</b><br>
+    Your entries save to <b>phone only</b>. If you clear history, data will be LOST.<br>
+    <span style="color:#fbbf24;">👉 Go to Setup tab → Connect Firebase to save data permanently.</span>
+  </div>
 
   <!-- Sheets bar -->
   <div class="sbar" id="sheetsBar">
@@ -3250,6 +3259,137 @@ let chkVals  = {};
 let sheetsUrl = localStorage.getItem('dalUrl') || 'https://script.google.com/macros/s/AKfycbwAnh3mWZY_rlPVBLZOR7mAzILmeT7l3oU_KPRkqSy-vqxRFRxfDshIiYgxJlpcuZg1UQ/exec';
 
 // ════════════════════════════════════════════════════════════
+// 🏷️ BUILD NAMED FIELDS — converts row array to readable fields
+// Maps each form type's data to professional named fields in Firestore
+// ════════════════════════════════════════════════════════════
+function buildNamedFields(sheetName, row, meta) {
+  // row[0-3] are always: project, truck, trailer, driver (already in common fields)
+  // We map row[4+] to type-specific named fields
+  const r = i => (row && row[i] !== undefined) ? row[i] : '—';
+
+  switch(sheetName) {
+    case 'Checklist':
+      return {
+        tripType:   r(4),
+        kmStart:    r(5),
+        kmEnd:      r(6),
+        fuelLevel:  r(7),
+        defects:    r(8),
+        remarks:    r(9),
+        status:     'Completed'
+      };
+
+    case 'Maintenance':
+      return {
+        maintType:  r(4),
+        priority:   r(5),
+        description:r(6),
+        kmReading:  r(7),
+        status:     'Pending'
+      };
+
+    case 'Breakdown':
+      return {
+        breakdownType: r(4),
+        location:      r(5),
+        trafficBlock:  r(6),
+        description:   r(7),
+        latitude:      r(8),
+        longitude:     r(9),
+        mapLink:       r(10),
+        status:        'Active'
+      };
+
+    case 'Accident':
+      return {
+        accidentType: r(4),
+        location:     r(5),
+        najmCase:     r(6),
+        najmLink:     r(7),
+        otherVehicle: r(8),
+        injury:       r(9),
+        description:  r(10),
+        latitude:     r(11),
+        longitude:    r(12),
+        mapLink:      r(13),
+        status:       'Reported'
+      };
+
+    case 'Workshop':
+      return {
+        action:        r(4),
+        mechanic:      r(5),
+        jobType:       r(6),
+        description:   r(7),
+        inspectionResult: r(8),
+        status:        'In Progress'
+      };
+
+    case 'Outside':
+      return {
+        jobCard:      r(4),
+        sendDate:     r(5),
+        vendor:       r(6),
+        repairType:   r(7),
+        cost:         r(8),
+        expectedReturn: r(9),
+        status:       'Sent Out'
+      };
+
+    case 'Tire':
+      return {
+        date:        r(4),
+        kmReading:   r(5),
+        position:    r(6),
+        oldSerial:   r(7),
+        oldSize:     r(8),
+        oldBrand:    r(9),
+        oldMonths:   r(10),
+        newSerial:   r(11),
+        newSize:     r(12),
+        newBrand:    r(13),
+        reason:      r(14),
+        location:    r(15),
+        requestedBy: r(16),
+        notes:       r(17),
+        status:      'Requested'
+      };
+
+    case 'PunctureRepair':
+      return {
+        date:        r(4),
+        kmReading:   r(5),
+        position:    r(6),
+        punctureType:r(7),
+        repairMethod:r(8),
+        repairStatus:r(9),
+        cost:        r(10),
+        location:    r(11),
+        notes:       r(12),
+        status:      'Repaired'
+      };
+
+    case 'AirPressure':
+      return {
+        date:    r(4),
+        kmReading: r(5),
+        psi_FL:  r(6),  psi_FR:  r(7),
+        psi_RLI: r(8),  psi_RLO: r(9),
+        psi_RRI: r(10), psi_RRO: r(11),
+        psi_A1L: r(12), psi_A1R: r(13),
+        psi_A2L: r(14), psi_A2R: r(15),
+        psi_A3L: r(16), psi_A3R: r(17),
+        action:  r(18),
+        notes:   r(19),
+        status:  'Checked'
+      };
+
+    default:
+      return { status: 'Submitted' };
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // ☁️  DAL CLOUD — Firebase Firestore Integration
 // Real-time sync, offline-capable, zero-Apps-Script backend
 // ════════════════════════════════════════════════════════════
@@ -3291,21 +3431,57 @@ const dalCloud = {
     }
   },
 
-  // Save an entry to Firestore
+  // Save an entry to Firestore — with READABLE ID + named fields (professional)
   async saveEntry(sheetName, rowData, meta) {
     if (!this.enabled || !this.db) return { ok:false, reason:'not-enabled' };
     try {
       const fb = window.dalFB;
+
+      // ── Build READABLE document ID: Type_YYYYMMDD_HHMMSS_truck ──
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const dateStr = now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate());
+      const timeStr = pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+      // Clean truck for ID (remove spaces/special chars)
+      const truckClean = (meta.truck || 'NA').replace(/[^a-zA-Z0-9]/g, '');
+      const docId = sheetName + '_' + dateStr + '_' + timeStr + '_' + truckClean;
+
+      // ── Build NAMED fields (professional, readable in Console) ──
+      const namedFields = buildNamedFields(sheetName, rowData, meta);
+
       const docData = {
+        // Core identification
+        type: sheetName,              // "Breakdown", "Checklist", etc.
+        docId: docId,                 // readable ID (also stored as field)
+
+        // Common named fields (every entry has these)
+        project:    meta.proj || '—',
+        truckNo:    meta.truck || '—',
+        trailerNo:  meta.trailer || '—',
+        driverName: meta.driver || '—',
+        icon:       meta.icon || '📄',
+
+        // Type-specific named fields
+        ...namedFields,
+
+        // Status tracking (workflow)
+        status: namedFields.status || 'Submitted',
+
+        // Timestamps
+        createdAt: fb.serverTimestamp(),
+        clientTime: now.toISOString(),
+        dateDisplay: meta.timestamp || (pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear()),
+
+        // Keep raw row for app compatibility (Dashboard/Reports/Excel read this)
         sheet: sheetName,
         row: rowData,
-        meta: meta || {},
-        createdAt: fb.serverTimestamp(),
-        clientTime: new Date().toISOString()
+        meta: meta || {}
       };
-      const colRef = fb.collection(this.db, 'entries');
-      const ref = await fb.addDoc(colRef, docData);
-      return { ok:true, id: ref.id };
+
+      // Use setDoc with readable ID instead of addDoc with random ID
+      const docRef = fb.doc(this.db, 'entries', docId);
+      await fb.setDoc(docRef, docData);
+      return { ok:true, id: docId };
     } catch (e) {
       console.warn('[dalCloud] Save error:', e);
       return { ok:false, reason: e.message };
@@ -4594,30 +4770,46 @@ function deleteOldHistory(days) {
 
 function clearAllHistory() {
   if (histData.length === 0) {
-    showToast('ℹ️ History already empty hai', false);
+    showToast('ℹ️ History is empty · السجل فارغ', false);
     return;
+  }
+
+  // 🛡️ SAFETY: Check for phone-only (unsynced) entries
+  const unsynced = histData.filter(h => !h.remote);
+  if (unsynced.length > 0) {
+    if (!confirm('🚨 WARNING · تحذير\n\n' + unsynced.length + ' entries are NOT synced to cloud yet!\n\nIf you clear now, these will be LOST PERMANENTLY.\n\nFirst tap "🔄 Sync to Sheet" to save them.\n\nContinue anyway? (NOT recommended)')) {
+      return;
+    }
   }
 
   // Double confirmation for safety
-  if (!confirm('⚠️ SAB ' + histData.length + ' history entries DELETE karne hain?\n\n📱 Sirf is phone se hatengi.\n☁️ Firebase cloud mein data SAFE rahega.\n\nManager dashboard mein wapas dikhega cloud sync hone par.')) {
+  if (!confirm('⚠️ Delete ALL ' + histData.length + ' history entries?\n\n📱 Only from this phone.\n☁️ Synced entries stay SAFE in Firebase.')) {
     return;
   }
 
-  if (!confirm('🚨 Pakka? Ye action wapas nahi hoti!\n\nFinal confirmation: SAB history clear karein?')) {
+  if (!confirm('🚨 Sure? This cannot be undone!\n\nFinal confirmation · تأكيد نهائي')) {
     return;
   }
 
-  const count = histData.length;
+  // 🛡️ SAFETY: Keep unsynced entries, only clear synced ones
+  const keptUnsynced = histData.filter(h => !h.remote);
+  const clearedCount = histData.length - keptUnsynced.length;
+
   histData.length = 0;
+  keptUnsynced.forEach(h => histData.push(h));
 
   try {
-    localStorage.removeItem('dalHist');
+    localStorage.setItem('dalHist', JSON.stringify(histData));
   } catch(e) {
     console.warn('[clear] Failed:', e);
   }
 
   renderHistory();
-  showToast('🗑️ Saari history clear ho gayi (' + count + ' entries)');
+  if (keptUnsynced.length > 0) {
+    showToast('🗑️ ' + clearedCount + ' synced cleared · ' + keptUnsynced.length + ' unsynced KEPT safe');
+  } else {
+    showToast('🗑️ All cleared (' + clearedCount + ') · تم المسح');
+  }
 }
 
 function deleteSingleHistory(index) {
@@ -6167,6 +6359,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // ════ COPY SCRIPT ════
 // ════ FIREBASE SETUP UI FUNCTIONS ════
 function refreshCloudStatus() {
+  // Show/hide the Firebase warning banner on forms page
+  const warnBanner = document.getElementById('fbWarnBanner');
+  if (warnBanner) {
+    warnBanner.style.display = dalCloud.enabled ? 'none' : 'block';
+  }
+
   const el = document.getElementById('cloudStatus');
   if (!el) return;
   if (dalCloud.enabled && dalCloud.config) {
