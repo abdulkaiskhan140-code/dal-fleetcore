@@ -5459,20 +5459,26 @@ function renderReportStats() {
   const el = document.getElementById('reportStats');
   if (!el) return;
   const total = reportData.length;
+  const checklists = reportData.filter(h => h.type === 'Checklist').length;
+  const maintenance = reportData.filter(h => h.type === 'Maintenance').length;
   const breakdowns = reportData.filter(h => h.type === 'Breakdown').length;
   const workshop  = reportData.filter(h => h.type === 'Workshop').length;
-  const checklists = reportData.filter(h => h.type === 'Checklist').length;
   const accidents = reportData.filter(h => h.type === 'Accident').length;
   const tires     = reportData.filter(h => h.type === 'TireRequest' || h.type === 'Tire').length;
-  const outside   = reportData.filter(h => h.type === 'OutsideRepair' || h.type === 'JobCard').length;
+  const puncture  = reportData.filter(h => h.type === 'PunctureRepair').length;
+  const airpress  = reportData.filter(h => h.type === 'AirPressure').length;
+  const outside   = reportData.filter(h => h.type === 'OutsideRepair' || h.type === 'Outside' || h.type === 'JobCard').length;
 
   el.innerHTML =
     statCard('📋', 'Total', total, '#3b82f6') +
     statCard('✅', 'Checklists', checklists, '#10b981') +
+    statCard('🔧', 'Maintenance', maintenance, '#06b6d4') +
     statCard('🏭', 'Workshop', workshop, '#a78bfa') +
     statCard('🚨', 'Breakdowns', breakdowns, '#ef4444') +
     statCard('💥', 'Accidents', accidents, '#f59e0b') +
-    statCard('🛞', 'Tire', tires, '#fb923c') +
+    statCard('🔩', 'Tire', tires, '#fb923c') +
+    statCard('🔧', 'Puncture', puncture, '#eab308') +
+    statCard('💨', 'Air Check', airpress, '#22d3ee') +
     statCard('🏗️', 'Outside', outside, '#10b981');
 }
 function statCard(icon, label, count, color) {
