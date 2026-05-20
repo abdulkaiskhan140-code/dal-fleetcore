@@ -829,6 +829,100 @@
 <body>
 
 <!-- ══════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- 🌍 SMART LANGUAGE PICKER MODAL — shows on first launch     -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="langPicker" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px;">
+  <div style="background:linear-gradient(135deg,#0f172a,#1e293b);
+    border:2px solid var(--accent);border-radius:18px;
+    max-width:380px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:40px;">🚛</div>
+      <div style="font-size:18px;font-weight:900;color:var(--accent);margin-top:4px;">DAL FLEETCORE</div>
+    </div>
+
+    <!-- Welcome text in all 5 languages -->
+    <div style="text-align:center;margin-bottom:18px;line-height:1.6;">
+      <div style="font-size:13px;color:var(--text);font-weight:700;">Welcome! Please choose your language</div>
+      <div style="font-size:13px;color:var(--text);font-weight:700;font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">مرحباً! الرجاء اختيار لغتك</div>
+      <div style="font-size:13px;color:var(--text);font-weight:700;">स्वागत है! कृपया अपनी भाषा चुनें</div>
+      <div style="font-size:13px;color:var(--text);font-weight:700;font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">خوش آمدید! براہ کرم اپنی زبان منتخب کریں</div>
+      <div style="font-size:13px;color:var(--text);font-weight:700;font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">خوش آمدید! لطفاً زبان خود را انتخاب کنید</div>
+    </div>
+
+    <!-- 5 Language Buttons -->
+    <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+
+      <button onclick="pickLanguage('en')" class="lang-pick-btn"
+        style="background:rgba(14,165,233,0.15);border:2px solid rgba(14,165,233,0.4);
+        color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🇬🇧</span>
+          <span>English</span>
+        </span>
+        <span style="font-size:11px;color:var(--muted);">EN</span>
+      </button>
+
+      <button onclick="pickLanguage('ar')" class="lang-pick-btn"
+        style="background:rgba(16,185,129,0.15);border:2px solid rgba(16,185,129,0.4);
+        color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+        font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🇸🇦</span>
+          <span>العربية</span>
+        </span>
+        <span style="font-size:11px;color:var(--muted);">AR</span>
+      </button>
+
+      <button onclick="pickLanguage('hi')" class="lang-pick-btn"
+        style="background:rgba(245,158,11,0.15);border:2px solid rgba(245,158,11,0.4);
+        color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🇮🇳</span>
+          <span>हिंदी</span>
+        </span>
+        <span style="font-size:11px;color:var(--muted);">HI</span>
+      </button>
+
+      <button onclick="pickLanguage('ur')" class="lang-pick-btn"
+        style="background:rgba(168,85,247,0.15);border:2px solid rgba(168,85,247,0.4);
+        color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+        font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🇵🇰</span>
+          <span>اردو</span>
+        </span>
+        <span style="font-size:11px;color:var(--muted);">UR</span>
+      </button>
+
+      <button onclick="pickLanguage('fa')" class="lang-pick-btn"
+        style="background:rgba(236,72,153,0.15);border:2px solid rgba(236,72,153,0.4);
+        color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+        font-family:'Noto Sans Arabic',sans-serif;" dir="rtl">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🇮🇷</span>
+          <span>فارسی</span>
+        </span>
+        <span style="font-size:11px;color:var(--muted);">FA</span>
+      </button>
+
+    </div>
+
+    <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--muted);font-style:italic;">
+      You can change language later from settings · يمكنك تغيير اللغة لاحقاً
+    </div>
+  </div>
+</div>
+
 <!-- ROLE LOGIN SCREEN                     -->
 <!-- ══════════════════════════════════════ -->
 <div class="login-screen" id="loginScreen">
@@ -839,10 +933,12 @@
   </div>
 
   <!-- LANGUAGE SWITCHER -->
-  <div class="lang-bar">
+  <div class="lang-bar" style="flex-wrap:wrap;gap:4px;">
     <button class="lang-btn act" onclick="setLang('en')">🇬🇧 EN</button>
-    <button class="lang-btn" onclick="setLang('hi')">🇮🇳 हिंदी</button>
     <button class="lang-btn" onclick="setLang('ar')">🇸🇦 عربي</button>
+    <button class="lang-btn" onclick="setLang('hi')">🇮🇳 हिंदी</button>
+    <button class="lang-btn" onclick="setLang('ur')">🇵🇰 اردو</button>
+    <button class="lang-btn" onclick="setLang('fa')">🇮🇷 فارسی</button>
   </div>
 
   <div class="login-sub" id="ls-choose" style="font-size:12px;color:var(--muted);margin-bottom:14px;text-align:center;position:relative;z-index:1;">
@@ -1277,6 +1373,21 @@
             <input type="text" class="txt line" id="bdLoc" placeholder="Road, city, landmark · الطريق، المدينة">
           </div>
 
+          <!-- 📍 GPS LOCATION CAPTURE -->
+          <div class="fld">
+            <label class="lbl">📍 GPS Location · الموقع الجغرافي</label>
+            <button type="button" onclick="getLocation('bd')"
+              style="width:100%;background:rgba(34,211,238,.15);border:1.5px solid rgba(34,211,238,.4);
+              color:#22d3ee;border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;
+              display:flex;align-items:center;justify-content:center;gap:6px;">
+              📍 Capture GPS Location · موقعي الحالي
+            </button>
+            <div id="locationText-bd" style="margin-top:8px;font-size:11px;color:var(--muted);
+              padding:8px;background:var(--surface2);border-radius:8px;text-align:center;">
+              Location not captured · لم يتم التقاط الموقع
+            </div>
+          </div>
+
           <div class="fld">
             <label class="lbl">Traffic Blocking? <span class="req">*</span> <span class="ar">· ٹریفک بلاک؟</span></label>
             <div class="pills">
@@ -1374,6 +1485,21 @@
           <div class="fld">
             <label class="lbl">Accident Location <span class="req">*</span> <span class="ar">· موقع الحادث · दुर्घटना स्थान</span></label>
             <input type="text" class="txt line" id="acLoc" placeholder="Road name, city, landmark · اسم الطريق، المدينة · सड़क, शहर, लैंडमार्क">
+          </div>
+
+          <!-- 📍 GPS LOCATION CAPTURE -->
+          <div class="fld">
+            <label class="lbl">📍 GPS Location · الموقع الجغرافي</label>
+            <button type="button" onclick="getLocation('ac')"
+              style="width:100%;background:rgba(34,211,238,.15);border:1.5px solid rgba(34,211,238,.4);
+              color:#22d3ee;border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;
+              display:flex;align-items:center;justify-content:center;gap:6px;">
+              📍 Capture GPS Location · موقعي الحالي
+            </button>
+            <div id="locationText-ac" style="margin-top:8px;font-size:11px;color:var(--muted);
+              padding:8px;background:var(--surface2);border-radius:8px;text-align:center;">
+              Location not captured · لم يتم التقاط الموقع
+            </div>
           </div>
 
           <!-- NAJM CASE NO -->
@@ -2346,6 +2472,245 @@
       </div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- 🔧 TIREMAN PANEL: PUNCTURE REPAIR -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <div class="fpanel" id="fpanel-tp">
+      <div class="card" style="border-color:rgba(245,158,11,.4);">
+        <div class="ch" style="background:rgba(245,158,11,.08);">
+          <div class="ch-ico">🔧</div>
+          <div>
+            <div class="ch-ttl" style="color:var(--yellow);">Tire Puncture Repair · إصلاح ثقب الإطار</div>
+            <div class="ch-sub">Puncture marammat ka record · Punctured tire repair details</div>
+          </div>
+        </div>
+        <div class="cb">
+
+          <!-- Date + KM -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="fld">
+              <label class="lbl">Date · تاریخ <span class="req">*</span></label>
+              <input type="date" class="txt line" id="tpDate">
+            </div>
+            <div class="fld">
+              <label class="lbl">KM Run · کلومیٹر</label>
+              <div class="kmw"><input type="number" id="tpKm" placeholder="000000" inputmode="numeric"><div class="kmu">KM</div></div>
+            </div>
+          </div>
+
+          <!-- Position -->
+          <div class="fld">
+            <label class="lbl">Tire Position · ٹائر پوزیشن <span class="req">*</span></label>
+            <select class="sel" id="tpPos">
+              <option value="">-- Select Position --</option>
+              <optgroup label="🚛 Truck">
+                <option value="FL">FL — Front Left</option>
+                <option value="FR">FR — Front Right</option>
+                <option value="RLI">RLI — Rear Left Inner</option>
+                <option value="RLO">RLO — Rear Left Outer</option>
+                <option value="RRI">RRI — Rear Right Inner</option>
+                <option value="RRO">RRO — Rear Right Outer</option>
+                <option value="Spare">Spare Truck</option>
+              </optgroup>
+              <optgroup label="🔗 Trailer">
+                <option value="A1-L">A1-L</option>
+                <option value="A1-R">A1-R</option>
+                <option value="A2-L">A2-L</option>
+                <option value="A2-R">A2-R</option>
+                <option value="A3-L">A3-L</option>
+                <option value="A3-R">A3-R</option>
+                <option value="Spare-TR">Spare Trailer</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Puncture Type -->
+          <div class="fld">
+            <label class="lbl">Puncture Type · کس قسم کا پنکچر <span class="req">*</span></label>
+            <div class="pill-row">
+              <div class="pill" onclick="setPill(this,'tpType','Nail')">🔩 Nail · کیل</div>
+              <div class="pill" onclick="setPill(this,'tpType','Sharp Object')">⚡ Sharp Object</div>
+              <div class="pill" onclick="setPill(this,'tpType','Slow Leak')">💨 Slow Leak · آہستہ ہوا نکلنا</div>
+              <div class="pill" onclick="setPill(this,'tpType','Side Cut')">✂️ Side Cut</div>
+              <div class="pill" onclick="setPill(this,'tpType','Valve Damage')">⚙️ Valve Issue</div>
+              <div class="pill" onclick="setPill(this,'tpType','Other')">❓ Other</div>
+            </div>
+          </div>
+
+          <!-- Repair Method -->
+          <div class="fld">
+            <label class="lbl">Repair Method · مرمت کا طریقہ <span class="req">*</span></label>
+            <div class="pill-row">
+              <div class="pill" onclick="setPill(this,'tpMethod','Plug')">🧷 Plug</div>
+              <div class="pill" onclick="setPill(this,'tpMethod','Patch')">🩹 Patch</div>
+              <div class="pill" onclick="setPill(this,'tpMethod','Plug+Patch')">🔧 Plug+Patch</div>
+              <div class="pill" onclick="setPill(this,'tpMethod','Hot Vulcanizing')">🔥 Hot Vulcanizing</div>
+              <div class="pill" onclick="setPill(this,'tpMethod','Replaced')">🔄 Replaced</div>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="fld">
+            <label class="lbl">Status · صورتحال</label>
+            <div class="pill-row">
+              <div class="pill" onclick="setPill(this,'tpStatus','Repaired OK')">✅ Repaired OK</div>
+              <div class="pill" onclick="setPill(this,'tpStatus','Needs Replacement')">⚠️ Needs Replacement</div>
+              <div class="pill" onclick="setPill(this,'tpStatus','Temporary Fix')">⏱️ Temporary Fix</div>
+            </div>
+          </div>
+
+          <!-- Cost -->
+          <div class="fld">
+            <label class="lbl">Cost · قیمت (SAR)</label>
+            <input type="number" class="txt" id="tpCost" placeholder="0.00" inputmode="decimal" step="0.01">
+          </div>
+
+          <!-- Location -->
+          <div class="fld">
+            <label class="lbl">Repair Location · جگہ</label>
+            <div class="pill-row">
+              <div class="pill" onclick="setPill(this,'tpLoc','Workshop')">🏭 Workshop</div>
+              <div class="pill" onclick="setPill(this,'tpLoc','Outside')">🏪 Outside Shop</div>
+              <div class="pill" onclick="setPill(this,'tpLoc','Roadside')">🛣️ Roadside</div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="fld">
+            <label class="lbl">Notes · نوٹس</label>
+            <textarea class="txt" id="tpNotes" rows="2" placeholder="Extra info, vendor name, etc."></textarea>
+          </div>
+
+          <button class="sbtn" onclick="doSubmit('puncture')" style="background:var(--yellow);">
+            <span class="btxt">📤 Submit Puncture Report · إرسال</span>
+            <span class="spn"><span class="spinner" style="border-top-color:#000;"></span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- 💨 TIREMAN PANEL: AIR MEASURING / PRESSURE CHECK -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <div class="fpanel" id="fpanel-am">
+      <div class="card" style="border-color:rgba(245,158,11,.4);">
+        <div class="ch" style="background:rgba(245,158,11,.08);">
+          <div class="ch-ico">💨</div>
+          <div>
+            <div class="ch-ttl" style="color:var(--yellow);">Air Pressure Check · فحص ضغط الإطارات</div>
+            <div class="ch-sub">Tire pressure measurement record · ٹائر کا ہوا چیک کرنا</div>
+          </div>
+        </div>
+        <div class="cb">
+
+          <!-- Date + KM -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="fld">
+              <label class="lbl">Date · تاریخ <span class="req">*</span></label>
+              <input type="date" class="txt line" id="amDate">
+            </div>
+            <div class="fld">
+              <label class="lbl">KM Run · کلومیٹر</label>
+              <div class="kmw"><input type="number" id="amKm" placeholder="000000" inputmode="numeric"><div class="kmu">KM</div></div>
+            </div>
+          </div>
+
+          <!-- Recommended PSI Note -->
+          <div style="background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:10px;margin:8px 0;font-size:11px;color:#0ea5e9;">
+            <b>📋 Recommended PSI:</b><br>
+            • Truck Front: 110-120 PSI · سامنے<br>
+            • Truck Rear: 100-110 PSI · پیچھے<br>
+            • Trailer: 100-110 PSI · ٹریلر
+          </div>
+
+          <!-- PSI INPUTS - TRUCK -->
+          <div class="fld">
+            <label class="lbl" style="color:var(--accent);font-weight:700;">🚛 TRUCK TIRES · ٹرک ٹائر</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label class="lbl" style="font-size:10px;">FL · سامنے بائیں</label>
+                <div class="kmw"><input type="number" id="amFL" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">FR · سامنے دائیں</label>
+                <div class="kmw"><input type="number" id="amFR" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">RLI · پچھلا بائیں اندر</label>
+                <div class="kmw"><input type="number" id="amRLI" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">RLO · پچھلا بائیں باہر</label>
+                <div class="kmw"><input type="number" id="amRLO" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">RRI · پچھلا دائیں اندر</label>
+                <div class="kmw"><input type="number" id="amRRI" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">RRO · پچھلا دائیں باہر</label>
+                <div class="kmw"><input type="number" id="amRRO" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PSI INPUTS - TRAILER -->
+          <div class="fld">
+            <label class="lbl" style="color:#22d3ee;font-weight:700;">🔗 TRAILER TIRES · ٹریلر ٹائر</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label class="lbl" style="font-size:10px;">A1-L · محور 1 بائیں</label>
+                <div class="kmw"><input type="number" id="amA1L" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">A1-R · محور 1 دائیں</label>
+                <div class="kmw"><input type="number" id="amA1R" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">A2-L · محور 2 بائیں</label>
+                <div class="kmw"><input type="number" id="amA2L" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">A2-R · محور 2 دائیں</label>
+                <div class="kmw"><input type="number" id="amA2R" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">A3-L · محور 3 بائیں</label>
+                <div class="kmw"><input type="number" id="amA3L" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+              <div>
+                <label class="lbl" style="font-size:10px;">A3-R · محور 3 دائیں</label>
+                <div class="kmw"><input type="number" id="amA3R" placeholder="0" inputmode="numeric"><div class="kmu">PSI</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Taken -->
+          <div class="fld">
+            <label class="lbl">Action Taken · کیا کیا گیا</label>
+            <div class="pill-row">
+              <div class="pill" onclick="setPill(this,'amAction','All OK')">✅ All OK</div>
+              <div class="pill" onclick="setPill(this,'amAction','Air Added')">⬆️ Air Added · ہوا بھری</div>
+              <div class="pill" onclick="setPill(this,'amAction','Air Reduced')">⬇️ Air Reduced · ہوا نکالی</div>
+              <div class="pill" onclick="setPill(this,'amAction','Needs Repair')">🔧 Needs Repair</div>
+              <div class="pill" onclick="setPill(this,'amAction','Needs Replacement')">🔄 Needs Replacement</div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="fld">
+            <label class="lbl">Notes · نوٹس</label>
+            <textarea class="txt" id="amNotes" rows="2" placeholder="Any specific tire concern, etc."></textarea>
+          </div>
+
+          <button class="sbtn" onclick="doSubmit('airmeasure')" style="background:var(--yellow);">
+            <span class="btxt">📤 Submit Air Check · إرسال</span>
+            <span class="spn"><span class="spinner" style="border-top-color:#000;"></span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /pad -->
 </div><!-- /forms -->
 
@@ -2370,7 +2735,7 @@
     </div>
 
     <!-- ACTION BUTTONS -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <button onclick="syncPendingData()"
         style="background:linear-gradient(135deg,var(--green),#34d399);color:#000;
         border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:700;
@@ -2385,6 +2750,99 @@
         📥 Export CSV
       </button>
     </div>
+
+    <!-- 🧹 SMART CLEANUP OPTIONS — Hybrid System -->
+    <details style="background:var(--surface);border:1px solid rgba(14,165,233,.3);border-radius:10px;margin-bottom:12px;">
+      <summary style="padding:10px 12px;cursor:pointer;font-size:11px;font-weight:700;color:var(--accent);list-style:none;">
+        🧹 Smart History Cleanup · ▼ Tap to expand
+      </summary>
+      <div style="padding:0 10px 8px;">
+
+        <!-- AUTO-CLEANUP SETTINGS -->
+        <div style="background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.25);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:6px;">
+            ⚙️ AUTO-CLEANUP SETTINGS
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:var(--text);padding:4px 0;">
+            <input type="checkbox" id="autoCleanup1Day" onchange="saveAutoCleanupSetting()" style="width:16px;height:16px;cursor:pointer;">
+            <span>📅 Auto-delete synced entries <b>1+ day old</b></span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:var(--text);padding:4px 0;">
+            <input type="checkbox" id="autoCleanup7Day" onchange="saveAutoCleanupSetting()" style="width:16px;height:16px;cursor:pointer;">
+            <span>📆 Auto-delete synced entries <b>7+ days old</b></span>
+          </label>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px;font-style:italic;">
+            ℹ️ Auto-cleanup runs on app open. Pending entries hamesha safe rehte.
+          </div>
+        </div>
+
+        <!-- MANUAL CLEANUP — RECOMMENDED -->
+        <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:8px;">
+            ⭐ MANUAL CLEANUP (Recommended)
+          </div>
+          <button onclick="syncAndClearSynced()"
+            style="width:100%;background:linear-gradient(135deg,var(--green),#34d399);color:#000;
+            border:none;border-radius:8px;padding:11px;font-size:11px;font-weight:700;
+            cursor:pointer;margin-bottom:6px;">
+            🔄 Sync to Cloud + Clear Synced
+          </button>
+          <div style="font-size:9px;color:var(--muted);line-height:1.4;">
+            Pending entries sync hongi, phir synced wali clear hongi.<br>
+            Pending entries safe rahegi (verification ke liye).
+          </div>
+        </div>
+
+        <!-- AGE-BASED CLEANUP -->
+        <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.25);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:#fb923c;margin-bottom:8px;">
+            🗓️ AGE-BASED CLEANUP (Synced Only)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <button onclick="deleteSyncedOld(1)"
+              style="background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fdba74;
+              border-radius:8px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">
+              📅 1+ Day Old
+            </button>
+            <button onclick="deleteSyncedOld(7)"
+              style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);color:#c084fc;
+              border-radius:8px;padding:9px 4px;font-size:10px;font-weight:700;cursor:pointer;">
+              📆 7+ Days Old
+            </button>
+          </div>
+        </div>
+
+        <!-- NUCLEAR OPTIONS -->
+        <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;">
+          <div style="font-size:10px;font-weight:700;color:#f87171;margin-bottom:8px;">
+            ⚠️ FULL CLEANUP (All Entries)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <button onclick="deleteOldHistory(30)"
+              style="background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fdba74;
+              border-radius:8px;padding:9px 4px;font-size:9px;font-weight:700;cursor:pointer;">
+              🗓️ 30+ Days
+            </button>
+            <button onclick="deleteOldHistory(90)"
+              style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);color:#c084fc;
+              border-radius:8px;padding:9px 4px;font-size:9px;font-weight:700;cursor:pointer;">
+              📅 90+ Days
+            </button>
+            <button onclick="clearAllHistory()"
+              style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.5);color:#f87171;
+              border-radius:8px;padding:9px 4px;font-size:9px;font-weight:700;cursor:pointer;">
+              ⚠️ Clear ALL
+            </button>
+          </div>
+        </div>
+
+        <div style="font-size:9px;color:var(--muted);line-height:1.5;padding:8px 0 0;">
+          ℹ️ <b>Phone se delete</b> hoga sirf.<br>
+          ☁️ Firebase cloud mein <b>data hamesha safe</b> rahega.<br>
+          💡 Manager dashboard mein cloud data dikhega.
+        </div>
+      </div>
+    </details>
 
     <!-- FILTER TABS -->
     <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;">
@@ -3033,6 +3491,81 @@ function switchForm(id, tab) {
   }
 }
 
+// ════════════════════════════════════════════════════════════
+// 📍 GPS LOCATION CAPTURE — for breakdown/accident tracking
+// Stores per-panel location data, generates Google Maps link
+// ════════════════════════════════════════════════════════════
+const gpsData = {}; // { bd: {lat, lng, map}, ac: {lat, lng, map} }
+
+function getLocation(panel) {
+  const txtEl = document.getElementById('locationText-' + panel);
+
+  if (!navigator.geolocation) {
+    if (txtEl) txtEl.innerHTML = '❌ GPS not supported on this device · لا يدعم GPS';
+    return;
+  }
+
+  // Show loading state
+  if (txtEl) {
+    txtEl.innerHTML = '⏳ Getting location... · جاري تحديد الموقع...';
+    txtEl.style.color = 'var(--yellow)';
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = Math.round(position.coords.accuracy);
+      const mapLink = 'https://maps.google.com/?q=' + lat + ',' + lng;
+
+      // Store for this panel
+      gpsData[panel] = {
+        lat: lat.toFixed(6),
+        lng: lng.toFixed(6),
+        map: mapLink,
+        accuracy: accuracy
+      };
+
+      // Update display
+      if (txtEl) {
+        txtEl.style.color = '#22d3ee';
+        txtEl.innerHTML =
+          '✅ Location Captured · تم التقاط الموقع<br>' +
+          '<span style="color:var(--muted);font-size:10px;">📍 ' + lat.toFixed(6) + ', ' + lng.toFixed(6) + '</span><br>' +
+          '<span style="color:var(--muted);font-size:10px;">Accuracy: ~' + accuracy + 'm</span><br>' +
+          '<a href="' + mapLink + '" target="_blank" style="color:#22d3ee;font-size:11px;text-decoration:underline;">🗺️ Open in Google Maps</a>';
+      }
+
+      // Auto-fill the text location field if empty
+      const locFld = document.getElementById(panel + 'Loc');
+      if (locFld && !locFld.value.trim()) {
+        locFld.value = lat.toFixed(5) + ', ' + lng.toFixed(5);
+      }
+
+      showToast('📍 GPS location captured!');
+    },
+
+    function(error) {
+      let msg = '❌ Location permission needed · يلزم إذن الموقع';
+      if (error.code === 1) msg = '❌ Permission denied — Allow location · تم رفض الإذن';
+      else if (error.code === 2) msg = '❌ Location unavailable · الموقع غير متاح';
+      else if (error.code === 3) msg = '❌ Timeout — Try again · انتهت المهلة';
+
+      if (txtEl) {
+        txtEl.style.color = '#f87171';
+        txtEl.innerHTML = msg;
+      }
+      showToast(msg, true);
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+}
+
 function setPill(el, key, val) {
   // Deselect siblings with same key in onclick
   el.parentElement.querySelectorAll('.pill').forEach(p => {
@@ -3275,7 +3808,10 @@ async function doSubmit(type) {
       document.getElementById('bdType').value||'—',
       document.getElementById('bdLoc').value||'—',
       pillVals['bdBlk']||'—',
-      document.getElementById('bdDesc').value||'—'];
+      document.getElementById('bdDesc').value||'—',
+      (gpsData['bd'] ? gpsData['bd'].lat : '—'),
+      (gpsData['bd'] ? gpsData['bd'].lng : '—'),
+      (gpsData['bd'] ? gpsData['bd'].map : '—')];
 
   } else if (type === 'workshop') {
     if (!pillVals['wsAct']) { showToast('❌ Action chunna! · اختر الإجراء! · कार्य चुनें!', true); return; }
@@ -3296,7 +3832,10 @@ async function doSubmit(type) {
       document.getElementById('acNajmLink').value||'—',
       document.getElementById('acOtherVeh').value||'—',
       pillVals['acInjury']||'—',
-      document.getElementById('acDesc').value||'—'];
+      document.getElementById('acDesc').value||'—',
+      (gpsData['ac'] ? gpsData['ac'].lat : '—'),
+      (gpsData['ac'] ? gpsData['ac'].lng : '—'),
+      (gpsData['ac'] ? gpsData['ac'].map : '—')];
 
   } else if (type === 'outside') {
     sheet = 'Outside';
@@ -3328,10 +3867,45 @@ async function doSubmit(type) {
       pillVals['tcLoc']||'—',
       document.getElementById('tcReqBy').value||'—',
       document.getElementById('tcNotes').value||'—'];
+
+  } else if (type === 'puncture') {
+    sheet = 'PunctureRepair';
+    row = [proj,truck,trailer,driver,
+      document.getElementById('tpDate').value||'—',
+      document.getElementById('tpKm').value||'—',
+      document.getElementById('tpPos').value||'—',
+      pillVals['tpType']||'—',
+      pillVals['tpMethod']||'—',
+      pillVals['tpStatus']||'—',
+      document.getElementById('tpCost').value||'—',
+      pillVals['tpLoc']||'—',
+      document.getElementById('tpNotes').value||'—'];
+
+  } else if (type === 'airmeasure') {
+    sheet = 'AirPressure';
+    row = [proj,truck,trailer,driver,
+      document.getElementById('amDate').value||'—',
+      document.getElementById('amKm').value||'—',
+      // Truck tires PSI
+      document.getElementById('amFL').value||'—',
+      document.getElementById('amFR').value||'—',
+      document.getElementById('amRLI').value||'—',
+      document.getElementById('amRLO').value||'—',
+      document.getElementById('amRRI').value||'—',
+      document.getElementById('amRRO').value||'—',
+      // Trailer tires PSI
+      document.getElementById('amA1L').value||'—',
+      document.getElementById('amA1R').value||'—',
+      document.getElementById('amA2L').value||'—',
+      document.getElementById('amA2R').value||'—',
+      document.getElementById('amA3L').value||'—',
+      document.getElementById('amA3R').value||'—',
+      pillVals['amAction']||'—',
+      document.getElementById('amNotes').value||'—'];
   }
 
   // Loading state
-  const panelMap = {checklist:'cl',maintenance:'mt',breakdown:'bd',accident:'ac',workshop:'ws',outside:'or',tire:'tc'};
+  const panelMap = {checklist:'cl',maintenance:'mt',breakdown:'bd',accident:'ac',workshop:'ws',outside:'or',tire:'tc',puncture:'tp',airmeasure:'am'};
   const btn = document.querySelector(`#fpanel-${panelMap[type]||'cl'} .sbtn`);
   if(btn) {
     btn.disabled = true;
@@ -3348,7 +3922,7 @@ async function doSubmit(type) {
     id: Date.now(),
     type: sheet,
     sheet: sheet,
-    icon: {Checklist:'📋',Maintenance:'🔧',Breakdown:'🚨',Accident:'💥',Workshop:'🏭',Outside:'🏗️',Tire:'🔩'}[sheet]||'📄',
+    icon: {Checklist:'📋',Maintenance:'🔧',Breakdown:'🚨',Accident:'💥',Workshop:'🏭',Outside:'🏗️',Tire:'🔩',PunctureRepair:'🔧',AirPressure:'💨'}[sheet]||'📄',
     proj, truck: selTruck ? selTruck.plate : truck, trailer, driver: driver.split(' ')[0],
     time: timestamp,
     remote: false,
@@ -3433,16 +4007,20 @@ async function doSubmit(type) {
     histData[0] = entry;
     localStorage.setItem('dalHist', JSON.stringify(histData.slice(0,200)));
     renderHistory();
-    if (cloudOk && ok)         showToast('✅ Cloud + Sheet mein save! · حُفظ في السحابة والجداول');
-    else if (cloudOk)          showToast('☁️ Firebase mein save! · حُفظ في السحابة');
-    else                       showToast('✅ Google Sheet mein save! · تم الحفظ في الجداول');
+    if (cloudOk && ok)         showToast('✅ Saved to Cloud + Sheet · حُفظ في السحابة والجداول');
+    else if (cloudOk)          showToast('☁️ Saved to Firebase · حُفظ في السحابة');
+    else                       showToast('✅ Saved to Google Sheet · تم الحفظ في الجداول');
   } else if (!sheetsUrl && !dalCloud.enabled) {
-    showToast('💾 Phone mein save! Backend connect karo · احفظ في الهاتف!');
+    showToast('💾 Saved to phone · Connect backend · احفظ في الهاتف!');
     queueForSync(entry);
   } else {
-    showToast('⚠️ Send fail — Phone mein save, baad mein sync hoga · فشل الإرسال');
+    showToast('⚠️ Send failed — Saved on phone, will sync later · فشل الإرسال');
     queueForSync(entry);
   }
+
+  // Reset GPS data for this panel after submit
+  if (type === 'breakdown') { delete gpsData['bd']; const t = document.getElementById('locationText-bd'); if(t){ t.style.color='var(--muted)'; t.innerHTML='Location not captured · لم يتم التقاط الموقع'; } }
+  if (type === 'accident')  { delete gpsData['ac']; const t = document.getElementById('locationText-ac'); if(t){ t.style.color='var(--muted)'; t.innerHTML='Location not captured · لم يتم التقاط الموقع'; } }
 }
 
 // ════ SHEETS ════
@@ -3502,8 +4080,12 @@ function renderHistory() {
     return;
   }
 
-  el.innerHTML = filtered.map(h => `
-    <div class="hi" style="border-color:${h.remote?'rgba(16,185,129,.2)':'rgba(245,158,11,.2)'};">
+  // Build entries with proper index reference (so delete works after filter)
+  el.innerHTML = filtered.map(h => {
+    // Find original index in histData
+    const origIdx = histData.indexOf(h);
+    return `
+    <div class="hi" style="border-color:${h.remote?'rgba(16,185,129,.2)':'rgba(245,158,11,.2)'};position:relative;">
       <div class="hi-ico">${h.icon||'📄'}</div>
       <div style="flex:1;">
         <div class="hi-ttl">${h.type} — <span style="color:var(--accent)">${h.proj}</span></div>
@@ -3515,7 +4097,13 @@ function renderHistory() {
           ${h.remote?'✅ Google Sheet':'💾 Phone only — tap Sync'}
         </span>
       </div>
-    </div>`).join('');
+      <button onclick="deleteSingleHistory(${origIdx})"
+        style="position:absolute;top:8px;right:8px;background:rgba(239,68,68,.12);
+        border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;
+        width:28px;height:28px;font-size:13px;cursor:pointer;padding:0;
+        display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>`;
+  }).join('');
 }
 
 // ════ PAGE NAV ════
@@ -3777,6 +4365,282 @@ async function syncPendingData() {
   } else {
     showToast('⚠️ ' + synced + ' synced, ' + failed.length + ' failed');
   }
+}
+
+// ════ HISTORY DELETE FUNCTIONS ════
+// ════════════════════════════════════════════════════════════
+// 🧹 SMART HYBRID CLEANUP SYSTEM
+// ════════════════════════════════════════════════════════════
+
+// ── Sync pending entries, then clear all synced ones ──
+async function syncAndClearSynced() {
+  // Step 1: Count pending
+  const pending = histData.filter(h => !h.remote);
+
+  if (pending.length === 0 && histData.filter(h=>h.remote).length === 0) {
+    showToast('ℹ️ History empty hai', false);
+    return;
+  }
+
+  // Step 2: If pending, sync first
+  if (pending.length > 0) {
+    if (!confirm('📤 ' + pending.length + ' pending entries sync karni hain pehle.\n\nFir saari synced entries clear hongi.\n\nProceed?')) {
+      return;
+    }
+
+    showToast('🔄 Syncing ' + pending.length + ' entries...');
+
+    if (typeof syncPendingData === 'function') {
+      await syncPendingData();
+    }
+
+    // Wait a moment for sync to complete
+    await new Promise(r => setTimeout(r, 1500));
+  }
+
+  // Step 3: Now clear synced
+  const stillSynced = histData.filter(h => h.remote);
+  const stillPending = histData.filter(h => !h.remote);
+
+  if (stillSynced.length === 0) {
+    showToast('ℹ️ Koi synced entry nahi mili clear karne ko', false);
+    return;
+  }
+
+  if (!confirm('✅ Sync complete!\n\n' + stillSynced.length + ' synced entries phone se clear karein?\n\n' + (stillPending.length > 0 ? '⚠️ ' + stillPending.length + ' pending entries SAFE rahegi.\n\n' : '') + '☁️ Firebase mein data hamesha safe hai.')) {
+    return;
+  }
+
+  // Keep only pending
+  histData.length = 0;
+  stillPending.forEach(h => histData.push(h));
+
+  try {
+    localStorage.setItem('dalHist', JSON.stringify(histData));
+  } catch(e) {
+    console.warn('[sync-clear] Save failed:', e);
+  }
+
+  renderHistory();
+  showToast('🧹 ' + stillSynced.length + ' synced entries cleared! ' + stillPending.length + ' pending safe.');
+}
+
+// ── Delete only SYNCED entries older than X days ──
+function deleteSyncedOld(days) {
+  const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+  const before = histData.length;
+
+  // Filter: keep entries that are NOT (synced AND old)
+  const kept = histData.filter(h => {
+    if (!h.remote) return true; // Pending — always keep
+    if (!h.ts) return true;     // No timestamp — keep (safer)
+    return h.ts > cutoff;       // Newer than cutoff — keep
+  });
+
+  const removed = before - kept.length;
+
+  if (removed === 0) {
+    showToast('ℹ️ Koi synced entry ' + days + '+ din purani nahi mili', false);
+    return;
+  }
+
+  const pendingKept = kept.filter(h => !h.remote).length;
+
+  if (!confirm('🧹 ' + removed + ' synced entries (' + days + '+ din purani) phone se delete?\n\n' + (pendingKept > 0 ? '⚠️ ' + pendingKept + ' pending entries SAFE rahegi.\n\n' : '') + '☁️ Firebase mein data safe.')) {
+    return;
+  }
+
+  histData.length = 0;
+  kept.forEach(h => histData.push(h));
+
+  try {
+    localStorage.setItem('dalHist', JSON.stringify(histData));
+  } catch(e) {
+    console.warn('[delete-synced] Save failed:', e);
+  }
+
+  renderHistory();
+  showToast('✅ ' + removed + ' synced entries cleared (' + days + '+ days old)');
+}
+
+// ── Save auto-cleanup preferences ──
+function saveAutoCleanupSetting() {
+  const auto1 = document.getElementById('autoCleanup1Day');
+  const auto7 = document.getElementById('autoCleanup7Day');
+
+  const settings = {
+    auto1Day: auto1 ? auto1.checked : false,
+    auto7Day: auto7 ? auto7.checked : false
+  };
+
+  // Only one can be on at a time (1-day is stricter)
+  if (settings.auto1Day && settings.auto7Day) {
+    // If user just turned on 1-day, turn off 7-day (1 is stricter)
+    if (auto1 && auto1.checked && auto1 === document.activeElement) {
+      auto7.checked = false;
+      settings.auto7Day = false;
+    } else if (auto7) {
+      auto1.checked = false;
+      settings.auto1Day = false;
+    }
+  }
+
+  try {
+    localStorage.setItem('dalAutoCleanup', JSON.stringify(settings));
+  } catch(e) {
+    console.warn('[auto-cleanup] Save failed:', e);
+  }
+
+  if (settings.auto1Day) {
+    showToast('⏰ Auto-cleanup ON: 1+ day old synced entries');
+    // Run immediately
+    setTimeout(() => runAutoCleanup(), 500);
+  } else if (settings.auto7Day) {
+    showToast('⏰ Auto-cleanup ON: 7+ days old synced entries');
+    setTimeout(() => runAutoCleanup(), 500);
+  } else {
+    showToast('✅ Auto-cleanup OFF');
+  }
+}
+
+// ── Run auto-cleanup based on saved settings ──
+function runAutoCleanup() {
+  try {
+    const saved = localStorage.getItem('dalAutoCleanup');
+    if (!saved) return;
+    const settings = JSON.parse(saved);
+
+    const days = settings.auto1Day ? 1 : (settings.auto7Day ? 7 : null);
+    if (!days) return;
+
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const before = histData.length;
+
+    const kept = histData.filter(h => {
+      if (!h.remote) return true; // Pending — always keep
+      if (!h.ts) return true;
+      return h.ts > cutoff;
+    });
+
+    const removed = before - kept.length;
+    if (removed === 0) return; // Nothing to clean
+
+    histData.length = 0;
+    kept.forEach(h => histData.push(h));
+
+    try {
+      localStorage.setItem('dalHist', JSON.stringify(histData));
+    } catch(e) {}
+
+    if (typeof renderHistory === 'function') renderHistory();
+
+    // Silent cleanup — no toast (would be annoying every app open)
+    console.log('[auto-cleanup] Removed ' + removed + ' synced entries ' + days + '+ days old');
+  } catch(e) {
+    console.warn('[auto-cleanup] Error:', e);
+  }
+}
+
+// ── Load auto-cleanup settings on page load ──
+function loadAutoCleanupSettings() {
+  try {
+    const saved = localStorage.getItem('dalAutoCleanup');
+    if (!saved) return;
+    const settings = JSON.parse(saved);
+
+    const auto1 = document.getElementById('autoCleanup1Day');
+    const auto7 = document.getElementById('autoCleanup7Day');
+    if (auto1) auto1.checked = !!settings.auto1Day;
+    if (auto7) auto7.checked = !!settings.auto7Day;
+  } catch(e) {}
+}
+
+function deleteOldHistory(days) {
+  const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+  const before = histData.length;
+
+  // Filter out entries older than cutoff
+  const kept = histData.filter(h => {
+    // h.ts is the timestamp (milliseconds)
+    if (!h.ts) return true; // if no timestamp, keep it (safer)
+    return h.ts > cutoff;
+  });
+
+  const removed = before - kept.length;
+
+  if (removed === 0) {
+    showToast('ℹ️ Koi ' + days + '+ din purani entry nahi mili', false);
+    return;
+  }
+
+  if (!confirm('⚠️ ' + removed + ' purani entries (' + days + '+ din) phone se DELETE karne hain?\n\n☁️ Firebase cloud mein data safe rahega.\n\n📱 Sirf is phone se hatengi.')) {
+    return;
+  }
+
+  // Replace histData
+  histData.length = 0;
+  kept.forEach(h => histData.push(h));
+
+  // Save updated array
+  try {
+    localStorage.setItem('dalHist', JSON.stringify(histData));
+  } catch(e) {
+    console.warn('[delete] Save failed:', e);
+  }
+
+  renderHistory();
+  showToast('✅ ' + removed + ' purani entries delete ho gayin (phone se)');
+}
+
+function clearAllHistory() {
+  if (histData.length === 0) {
+    showToast('ℹ️ History already empty hai', false);
+    return;
+  }
+
+  // Double confirmation for safety
+  if (!confirm('⚠️ SAB ' + histData.length + ' history entries DELETE karne hain?\n\n📱 Sirf is phone se hatengi.\n☁️ Firebase cloud mein data SAFE rahega.\n\nManager dashboard mein wapas dikhega cloud sync hone par.')) {
+    return;
+  }
+
+  if (!confirm('🚨 Pakka? Ye action wapas nahi hoti!\n\nFinal confirmation: SAB history clear karein?')) {
+    return;
+  }
+
+  const count = histData.length;
+  histData.length = 0;
+
+  try {
+    localStorage.removeItem('dalHist');
+  } catch(e) {
+    console.warn('[clear] Failed:', e);
+  }
+
+  renderHistory();
+  showToast('🗑️ Saari history clear ho gayi (' + count + ' entries)');
+}
+
+function deleteSingleHistory(index) {
+  if (index < 0 || index >= histData.length) return;
+  const entry = histData[index];
+
+  if (!confirm('Ye entry delete karein?\n\n' +
+    (entry.icon || '📄') + ' ' + (entry.type || '—') + '\n' +
+    'Truck: ' + (entry.truck || '—') + '\n' +
+    'Time: ' + (entry.time || '—'))) {
+    return;
+  }
+
+  histData.splice(index, 1);
+
+  try {
+    localStorage.setItem('dalHist', JSON.stringify(histData));
+  } catch(e) {
+    console.warn('[delete-single] Save failed:', e);
+  }
+
+  renderHistory();
+  showToast('🗑️ Entry deleted');
 }
 
 // ════ EXPORT CSV ════
@@ -4965,7 +5829,8 @@ const ROLE_CONFIG = {
   },
   tireman: {
     icon:'🔩', name:'Tire Man', nameAr:'ٹائر مین', color:'var(--yellow)',
-    tabs:['tc'], labels:['🔩 Tire Request']
+    tabs:['tc','tp','am'],
+    labels:['🔩 Tire Request','🔧 Puncture Repair','💨 Air Measuring']
   },
   manager: {
     icon:'📊', name:'Manager', nameAr:'مینجر', color:'#c084fc',
@@ -5095,6 +5960,11 @@ function buildRoleTabs(role) {
 }
 
 function logoutRole() {
+  // Check if role is locked (set via QR auto-config)
+  if (window._roleLocked) {
+    showToast('🔒 Role locked. Cannot change without admin.', true);
+    return;
+  }
   currentRole = null;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('fTabs').style.display = 'none';
@@ -5109,6 +5979,82 @@ function logoutRole() {
   if(rn) rn.textContent = '—';
 }
 
+// ════════════════════════════════════════════════════════════
+// 🔒 ROLE LOCK SYSTEM — for QR-based deployment
+// When driver scans QR with &lock=1, they CANNOT change role
+// Only admin (with PIN 9999) can unlock
+// ════════════════════════════════════════════════════════════
+function applyRoleLock(role) {
+  window._roleLocked = role;
+  const cfg = ROLE_CONFIG[role] || {};
+
+  // Add lock visual indicator to role badge
+  setTimeout(() => {
+    const rb = document.getElementById('roleBadgeBar');
+    if (rb) {
+      // Make badge non-clickable for role change
+      rb.style.cursor = 'default';
+      rb.title = 'Role locked by admin';
+      // Add small lock icon
+      const ri = document.getElementById('roleIcon');
+      if (ri && !ri.textContent.includes('🔒')) {
+        const original = ri.textContent;
+        ri.innerHTML = original + '<span style="font-size:10px;margin-left:3px;opacity:0.7;">🔒</span>';
+      }
+    }
+
+    // Override the badge click handler — show admin unlock prompt instead
+    if (rb) {
+      rb.onclick = function() {
+        promptAdminUnlock();
+      };
+    }
+
+    // Hide all OTHER role cards on login screen (in case user navigates there somehow)
+    document.querySelectorAll('.role-card').forEach(card => {
+      const onclick = card.getAttribute('onclick') || '';
+      if (!onclick.includes("'" + role + "'")) {
+        card.style.display = 'none';
+      }
+    });
+  }, 100);
+}
+
+// Admin unlock — requires admin PIN
+function promptAdminUnlock() {
+  const pin = prompt('🔒 Role is LOCKED\n\nAdmin PIN chahiye role change karne ke liye:\n(Ye PIN sirf manager/admin ko maloom hai)');
+  if (pin === null) return; // cancelled
+
+  // Admin PIN = Manager PIN (9999)
+  if (pin === ROLE_PINS.manager || pin === SETUP_ADMIN_PASSWORD) {
+    window._roleLocked = null;
+    sessionStorage.removeItem('dalRoleLock');
+    // Show all role cards again
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.style.display = '';
+    });
+    // Restore badge cursor
+    const rb = document.getElementById('roleBadgeBar');
+    if (rb) {
+      rb.style.cursor = 'pointer';
+      rb.title = '';
+      rb.onclick = function() {
+        if(currentRole && confirm('Role change karna hai?')) logoutRole();
+      };
+    }
+    showToast('🔓 Role unlocked! Ab change kar sakte ho.');
+    // Now allow logout
+    if (confirm('Role change karna hai abhi?')) {
+      currentRole = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('fTabs').style.display = 'none';
+    }
+  } else {
+    showToast('❌ Wrong admin PIN!', true);
+  }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
   const badge = document.getElementById('roleBadgeBar');
   if(badge) badge.onclick = function() {
@@ -5116,10 +6062,70 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   // Build inspection checklist for Foreman tab
   if (typeof buildInspection === 'function') buildInspection();
-  // Initialize Firebase cloud status indicator + start sync if connected
-  if (typeof refreshCloudStatus === 'function') setTimeout(refreshCloudStatus, 300);
+
+  // ════════════════════════════════════════════════════════════
+  // 🎁 AUTO-CONFIG FROM URL — for QR-based rollout
+  // URL format: ?cfg=BASE64_CONFIG&role=driver&lock=1
+  // Driver scans QR → Firebase auto-connects + role auto-enters + LOCKED
+  // ════════════════════════════════════════════════════════════
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const cfgParam = urlParams.get('cfg');
+    const suggestedRole = urlParams.get('role');
+    const lockMode = urlParams.get('lock') === '1';
+
+    if (cfgParam && !dalCloud.enabled) {
+      const decoded = atob(cfgParam);
+      const parsed = JSON.parse(decoded);
+      if (parsed.apiKey && parsed.projectId) {
+        // Save config IMMEDIATELY — no delay
+        dalCloud.setConfig(parsed);
+        // Pre-fill setup form fields immediately (already in DOM by now)
+        const fill = (id, val) => { const e = document.getElementById(id); if (e && val) e.value = val; };
+        fill('fbApiKey', parsed.apiKey);
+        fill('fbAuthDomain', parsed.authDomain || (parsed.projectId + '.firebaseapp.com'));
+        fill('fbProjectId', parsed.projectId);
+        fill('fbStorageBucket', parsed.storageBucket || (parsed.projectId + '.firebasestorage.app'));
+        fill('fbAppId', parsed.appId || '');
+        // Show welcome toast quickly
+        setTimeout(() => {
+          showToast('✅ Auto-connected!');
+        }, 300);
+      }
+    }
+
+    // Auto-enter role from URL IMMEDIATELY (no delay — QR is the credential)
+    if (suggestedRole && ['driver','coordinator','foreman','tireman','manager'].includes(suggestedRole)) {
+      // Save lock state
+      if (lockMode) {
+        sessionStorage.setItem('dalRoleLock', suggestedRole);
+        window._roleLocked = suggestedRole;
+      }
+      // Enter role immediately
+      if (typeof enterRole === 'function') {
+        enterRole(suggestedRole);
+        if (lockMode) applyRoleLock(suggestedRole);
+      }
+    } else {
+      // Check if previously locked in this session
+      const savedLock = sessionStorage.getItem('dalRoleLock');
+      if (savedLock && ['driver','coordinator','foreman','tireman','manager'].includes(savedLock)) {
+        window._roleLocked = savedLock;
+        if (typeof enterRole === 'function') {
+          enterRole(savedLock);
+          applyRoleLock(savedLock);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[auto-config] Failed:', e);
+  }
+  // ════════════════════════════════════════════════════════════
+
+  // Initialize Firebase cloud status indicator + start sync — faster
+  if (typeof refreshCloudStatus === 'function') setTimeout(refreshCloudStatus, 100);
   if (typeof startCloudSync === 'function') {
-    setTimeout(() => { if (dalCloud.enabled) startCloudSync(); }, 800);
+    setTimeout(() => { if (dalCloud.enabled) startCloudSync(); }, 200);
   }
   // One-time migration: normalize legacy timestamps (Arabic-Indic digits,
   // RTL marks, MM/DD format) to clean DD/MM/YYYY Western digits
@@ -5144,6 +6150,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   } catch(err) { console.warn('Migration error:', err); }
+
+  // 🧹 Load auto-cleanup settings + run cleanup on app open
+  setTimeout(() => {
+    if (typeof loadAutoCleanupSettings === 'function') loadAutoCleanupSettings();
+    if (typeof runAutoCleanup === 'function') runAutoCleanup();
+  }, 500);
+
+  // 🌍 Show language picker on first launch
+  if (typeof checkFirstLaunchLanguage === 'function') {
+    checkFirstLaunchLanguage();
+  }
 });
 
 
@@ -6073,6 +7090,206 @@ const LANGS = {
     trlNoHolder: 'رقم المقطورة (مثال: H046 أو D046)',
     projHolder:  'اسم المشروع (مثال: SAUDI5)',
     emojiHolder: 'رمز تعبيري',
+  },
+  ur: {
+    dir: 'rtl',
+    loginSub:    'ایڈوانسڈ لاجسٹکس کمپنی · فلیٹ مینجمنٹ سسٹم',
+    chooseRole:  'جاری رکھنے کے لیے اپنا کردار منتخب کریں',
+    driverTitle: 'ڈرائیور',
+    driverDesc:  'روزانہ معائنہ، خرابی اور حادثے کی رپورٹنگ',
+    driverForms: '📋 چیک لسٹ · 🔧 دیکھ بھال · 🚨 خرابی · 💥 حادثہ',
+    supTitle:    'سپروائزر / کوآرڈینیٹر',
+    supDesc:     'باہر کی مرمت کا انتظام',
+    supForms:    '🏗️ باہر کی مرمت',
+    foreTitle:   'فورمین',
+    foreDesc:    'ورکشاپ کے کام اور میکینکس کا انتظام',
+    foreForms:   '🏭 ورکشاپ',
+    tireTitle:   'ٹائر مین',
+    tireDesc:    'ٹائر تبدیلی کی درخواست اور ٹریکنگ',
+    tireForms:   '🔩 ٹائر کی درخواست · 🔧 پنکچر · 💨 ہوا کا دباؤ',
+    mgrTitle:    'مینجر',
+    mgrDesc:     'لائیو ڈیش بورڈ، تمام ڈیٹا اور رپورٹس',
+    mgrForms:    '📊 ڈیش بورڈ · ⚙️ ایڈمن پینل',
+    vehicleSec:  'گاڑی کا انتخاب',
+    selectVeh:   'گاڑی کی تفصیلات منتخب کریں',
+    selectVehSub:'ڈراپ ڈاؤن سے دستی طور پر منتخب کریں',
+    projLbl:     'پروجیکٹ',
+    truckLbl:    'ٹرک کا پلیٹ نمبر',
+    driverLbl:   'ڈرائیور کا نام',
+    trailerLbl:  'ٹریلر / ہاپر نمبر',
+    projPh:      '-- پروجیکٹ منتخب کریں --',
+    truckPh:     '-- پہلے پروجیکٹ منتخب کریں --',
+    driverPh:    '-- پہلے ٹرک منتخب کریں --',
+    trailerPh:   '-- ٹریلر منتخب کریں --',
+    admTtl:      '⚙️ ایڈمن پینل',
+    admSub:      'ٹرک · ڈرائیور · ٹریلر · پروجیکٹ کا انتظام',
+    admTrucksTab:'🚛 ٹرک',
+    admDrvTab:   '👤 ڈرائیور',
+    admTrlTab:   '🔗 ٹریلر',
+    admProjTab:  '🏗️ پروجیکٹ',
+    admAddTruck: '➕ نیا ٹرک شامل کریں',
+    admAllTruck: '📋 تمام ٹرک',
+    admAddDrv:   '➕ نیا ڈرائیور شامل کریں',
+    admAllDrv:   '📋 تمام ڈرائیور',
+    admAddTrl:   '➕ نیا ٹریلر شامل کریں',
+    admAllTrl:   '📋 تمام ٹریلر',
+    admAddProj:  '➕ نیا پروجیکٹ شامل کریں',
+    admAllProj:  '📋 تمام پروجیکٹ',
+    admNoTrucks: 'کوئی ٹرک شامل نہیں',
+    admNoDrvs:   'کوئی ڈرائیور شامل نہیں',
+    admNoTrls:   'کوئی ٹریلر شامل نہیں',
+    admNoProjs:  'کوئی پروجیکٹ شامل نہیں',
+    admTrucksReg:'ٹرک رجسٹرڈ',
+    admBtnAddTr: '➕ ٹرک شامل کریں',
+    admBtnAddDr: '➕ ڈرائیور شامل کریں',
+    admBtnAddTl: '➕ ٹریلر شامل کریں',
+    admBtnAddPr: '➕ پروجیکٹ شامل کریں',
+    plateHolder: 'مثال: ABC 1234',
+    makeHolder:  'مثال: MAN TGS 2020',
+    typeHolder:  'مثال: ٹپر',
+    trailerHolder:'مثال: H046 (اختیاری)',
+    driverHolder:'مثال: محمد علی',
+    drvNameHolder:'ڈرائیور کا پورا نام',
+    truckPlateLk:'ٹرک پلیٹ (اختیاری)',
+    trlNoHolder: 'ٹریلر نمبر (مثال: H046 یا D046)',
+    projHolder:  'پروجیکٹ کا نام (مثال: SAUDI5)',
+    formsNav:    'فارمز',
+    histNav:     'ہسٹری',
+    setupNav:    'سیٹ اپ',
+    offline:     'آف لائن',
+    live:        'لائیو',
+    connectBtn:  '🔗 Google Sheets سے کنیکٹ کریں',
+    connectSub:  'نیچے Apps Script URL پیسٹ کریں',
+    admTitle:    '⚙️ فلیٹ ایڈمن',
+    admTabTruck: '🚛 ٹرک',
+    admTabDrv:   '👤 ڈرائیور',
+    admTabTrl:   '🔗 ٹریلر',
+    admTabProj:  '🏗️ پروجیکٹ',
+    admAutoSave: '✅ تبدیلیاں خودکار محفوظ ہوتی ہیں',
+    admLoad:     '☁️ لوڈ',
+    admBtnTruck: '✚ ٹرک شامل کریں',
+    admBtnDrv:   '✚ ڈرائیور شامل کریں',
+    admBtnTrl:   '✚ ٹریلر شامل کریں',
+    admBtnProj:  '✚ پروجیکٹ شامل کریں',
+    admWarnProj: '⚠️ پروجیکٹ حذف کرنے سے اس کے ٹرک/ڈرائیور متاثر ہو سکتے ہیں',
+    errDrvName:  '❌ ڈرائیور کا نام ضروری ہے!',
+    errTrlNo:    '❌ ٹریلر نمبر ضروری ہے!',
+    errTrlDup:   '⚠️ یہ ٹریلر پہلے سے موجود ہے!',
+    errProjName: '❌ پروجیکٹ کا نام ضروری ہے!',
+    errProjDup:  '⚠️ یہ پروجیکٹ پہلے سے موجود ہے!',
+    okTruck:     '🚛 ٹرک شامل ہو گیا!',
+    okDriver:    '👤 ڈرائیور شامل ہو گیا!',
+    okTrailer:   '🔗 ٹریلر شامل ہو گیا!',
+    okProject:   '🏗️ پروجیکٹ شامل ہو گیا!',
+    delTruck:    '🗑️ ٹرک ہٹا دیا گیا',
+    delDriver:   '🗑️ ڈرائیور ہٹا دیا گیا',
+    delTrailer:  '🗑️ ٹریلر ہٹا دیا گیا',
+    delProject:  '🗑️ پروجیکٹ ہٹا دیا گیا',
+    confirmDrv:  'یہ ڈرائیور حذف کریں؟',
+    confirmTrl:  'یہ ٹریلر حذف کریں؟',
+    trlHolder:   'ٹریلر نمبر (مثال: D001 یا H001)',
+    drvHolder:   'ڈرائیور کا نام',
+    emojiHolder: 'ایموجی',
+  },
+  fa: {
+    dir: 'rtl',
+    loginSub:    'شرکت لجستیک پیشرفته · سیستم مدیریت ناوگان',
+    chooseRole:  'برای ادامه نقش خود را انتخاب کنید',
+    driverTitle: 'راننده',
+    driverDesc:  'بازرسی روزانه، گزارش خرابی و تصادف',
+    driverForms: '📋 چک لیست · 🔧 نگهداری · 🚨 خرابی · 💥 تصادف',
+    supTitle:    'سرپرست / هماهنگ کننده',
+    supDesc:     'مدیریت تعمیرات خارجی',
+    supForms:    '🏗️ تعمیر خارجی',
+    foreTitle:   'سرکارگر',
+    foreDesc:    'عملیات کارگاه و مدیریت مکانیک',
+    foreForms:   '🏭 کارگاه',
+    tireTitle:   'لاستیک ساز',
+    tireDesc:    'درخواست تعویض لاستیک و پیگیری',
+    tireForms:   '🔩 درخواست لاستیک · 🔧 پنچری · 💨 فشار باد',
+    mgrTitle:    'مدیر',
+    mgrDesc:     'داشبورد زنده، همه داده‌ها و گزارش‌ها',
+    mgrForms:    '📊 داشبورد · ⚙️ پنل مدیریت',
+    vehicleSec:  'انتخاب وسیله نقلیه',
+    selectVeh:   'جزئیات وسیله نقلیه را انتخاب کنید',
+    selectVehSub:'به صورت دستی از منوی کشویی انتخاب کنید',
+    projLbl:     'پروژه',
+    truckLbl:    'شماره پلاک کامیون',
+    driverLbl:   'نام راننده',
+    trailerLbl:  'شماره تریلر / هاپر',
+    projPh:      '-- پروژه را انتخاب کنید --',
+    truckPh:     '-- ابتدا پروژه را انتخاب کنید --',
+    driverPh:    '-- ابتدا کامیون را انتخاب کنید --',
+    trailerPh:   '-- تریلر را انتخاب کنید --',
+    admTtl:      '⚙️ پنل مدیریت',
+    admSub:      'مدیریت کامیون · راننده · تریلر · پروژه',
+    admTrucksTab:'🚛 کامیون',
+    admDrvTab:   '👤 راننده',
+    admTrlTab:   '🔗 تریلر',
+    admProjTab:  '🏗️ پروژه',
+    admAddTruck: '➕ کامیون جدید اضافه کنید',
+    admAllTruck: '📋 همه کامیون‌ها',
+    admAddDrv:   '➕ راننده جدید اضافه کنید',
+    admAllDrv:   '📋 همه رانندگان',
+    admAddTrl:   '➕ تریلر جدید اضافه کنید',
+    admAllTrl:   '📋 همه تریلرها',
+    admAddProj:  '➕ پروژه جدید اضافه کنید',
+    admAllProj:  '📋 همه پروژه‌ها',
+    admNoTrucks: 'هیچ کامیونی اضافه نشده',
+    admNoDrvs:   'هیچ راننده‌ای اضافه نشده',
+    admNoTrls:   'هیچ تریلری اضافه نشده',
+    admNoProjs:  'هیچ پروژه‌ای اضافه نشده',
+    admTrucksReg:'کامیون ثبت شده',
+    admBtnAddTr: '➕ کامیون اضافه کنید',
+    admBtnAddDr: '➕ راننده اضافه کنید',
+    admBtnAddTl: '➕ تریلر اضافه کنید',
+    admBtnAddPr: '➕ پروژه اضافه کنید',
+    plateHolder: 'مثال: ABC 1234',
+    makeHolder:  'مثال: MAN TGS 2020',
+    typeHolder:  'مثال: کمپرسی',
+    trailerHolder:'مثال: H046 (اختیاری)',
+    driverHolder:'مثال: محمد علی',
+    drvNameHolder:'نام کامل راننده',
+    truckPlateLk:'پلاک کامیون (اختیاری)',
+    trlNoHolder: 'شماره تریلر (مثال: H046 یا D046)',
+    projHolder:  'نام پروژه (مثال: SAUDI5)',
+    formsNav:    'فرم‌ها',
+    histNav:     'تاریخچه',
+    setupNav:    'تنظیمات',
+    offline:     'آفلاین',
+    live:        'زنده',
+    connectBtn:  '🔗 اتصال به Google Sheets',
+    connectSub:  'آدرس Apps Script را در زیر بچسبانید',
+    admTitle:    '⚙️ مدیریت ناوگان',
+    admTabTruck: '🚛 کامیون',
+    admTabDrv:   '👤 راننده',
+    admTabTrl:   '🔗 تریلر',
+    admTabProj:  '🏗️ پروژه',
+    admAutoSave: '✅ تغییرات خودکار ذخیره می‌شوند',
+    admLoad:     '☁️ بارگذاری',
+    admBtnTruck: '✚ افزودن کامیون',
+    admBtnDrv:   '✚ افزودن راننده',
+    admBtnTrl:   '✚ افزودن تریلر',
+    admBtnProj:  '✚ افزودن پروژه',
+    admWarnProj: '⚠️ حذف پروژه ممکن است بر کامیون‌ها/رانندگان آن تأثیر بگذارد',
+    errDrvName:  '❌ نام راننده الزامی است!',
+    errTrlNo:    '❌ شماره تریلر الزامی است!',
+    errTrlDup:   '⚠️ این تریلر از قبل موجود است!',
+    errProjName: '❌ نام پروژه الزامی است!',
+    errProjDup:  '⚠️ این پروژه از قبل موجود است!',
+    okTruck:     '🚛 کامیون اضافه شد!',
+    okDriver:    '👤 راننده اضافه شد!',
+    okTrailer:   '🔗 تریلر اضافه شد!',
+    okProject:   '🏗️ پروژه اضافه شد!',
+    delTruck:    '🗑️ کامیون حذف شد',
+    delDriver:   '🗑️ راننده حذف شد',
+    delTrailer:  '🗑️ تریلر حذف شد',
+    delProject:  '🗑️ پروژه حذف شد',
+    confirmDrv:  'این راننده حذف شود؟',
+    confirmTrl:  'این تریلر حذف شود؟',
+    trlHolder:   'شماره تریلر (مثال: D001 یا H001)',
+    drvHolder:   'نام راننده',
+    emojiHolder: 'ایموجی',
   }
 };
 
@@ -6083,9 +7300,75 @@ function setLang(lang) {
   localStorage.setItem('dalLang', lang);
   // Update lang buttons
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('act'));
-  const idx = {en:0, hi:1, ar:2}[lang];
-  document.querySelectorAll('.lang-btn')[idx].classList.add('act');
+  const idx = {en:0, ar:1, hi:2, ur:3, fa:4}[lang];
+  const btns = document.querySelectorAll('.lang-btn');
+  if (btns[idx]) btns[idx].classList.add('act');
   applyLang(lang);
+}
+
+// ════════════════════════════════════════════════════════════
+// 🌍 SMART LANGUAGE PICKER — first launch + role-based defaults
+// ════════════════════════════════════════════════════════════
+
+// Pick language from modal & save permanently
+function pickLanguage(lang) {
+  setLang(lang);
+  // Mark that user has picked (won't show again)
+  localStorage.setItem('dalLangPicked', '1');
+  // Hide modal
+  const modal = document.getElementById('langPicker');
+  if (modal) modal.style.display = 'none';
+}
+
+// Show language picker modal
+function showLanguagePicker(suggestedLang) {
+  const modal = document.getElementById('langPicker');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  // Optional: pre-highlight suggested language
+  if (suggestedLang) {
+    document.querySelectorAll('.lang-pick-btn').forEach(b => {
+      b.style.boxShadow = '';
+    });
+    const allBtns = document.querySelectorAll('.lang-pick-btn');
+    const langOrder = ['en','ar','hi','ur','fa'];
+    const idx = langOrder.indexOf(suggestedLang);
+    if (idx >= 0 && allBtns[idx]) {
+      allBtns[idx].style.boxShadow = '0 0 0 3px var(--accent)';
+    }
+  }
+}
+
+// Smart default language based on role (used when QR includes role)
+function getSmartDefaultLang(role) {
+  const ROLE_LANG_DEFAULTS = {
+    driver:      'ur',  // Most drivers are Urdu/Hindi speakers
+    coordinator: 'en',  // Supervisor — office English
+    foreman:     'en',  // Foreman — office English
+    tireman:     'ur',  // Tireman — usually subcontinental
+    manager:     'en'   // Manager — English
+  };
+  return ROLE_LANG_DEFAULTS[role] || 'en';
+}
+
+// Check if first launch — show picker
+function checkFirstLaunchLanguage() {
+  const picked = localStorage.getItem('dalLangPicked');
+  if (picked === '1') return false; // already picked
+
+  // Get suggested language from URL role param
+  let suggested = 'en';
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+    if (role) {
+      suggested = getSmartDefaultLang(role);
+    }
+  } catch(e) {}
+
+  // Show picker
+  setTimeout(() => showLanguagePicker(suggested), 400);
+  return true;
 }
 
 function applyLang(lang) {
