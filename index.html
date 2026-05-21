@@ -1794,7 +1794,7 @@
           <!-- FLEET ALERTS -->
           <div style="padding:0 12px 12px;">
             <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
-              margin-bottom:8px;font-family:'IBM Plex Mono',monospace;">🚨 Fleet Alerts</div>
+              margin-bottom:8px;font-family:'IBM Plex Mono',monospace;">💡 Owner Insights</div>
             <div id="dashAlerts"><div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">Loading...</div></div>
           </div>
 
@@ -5164,6 +5164,95 @@ function renderDashProjectCards() {
 function renderDashAlerts() {
   const el = document.getElementById('dashAlerts'); if(!el) return;
   const d = dashFiltered;
+
+  // ═══ OWNER INSIGHTS — Smart fleet intelligence ═══
+  let html = '';
+
+  // ── 1. RED FLAGS (critical issues) ──
+  const redFlags = [];
+
+  // Problem trucks: 2+ breakdowns
+  const truckBreakdowns = {};
+  d.filter(x=>x.type==='Breakdown').forEach(b => {
+    const t = b.truck || '—';
+    truckBreakdowns[t] = (truckBreakdowns[t]||0) + 1;
+  });
+  Object.entries(truckBreakdowns).filter(([t,c])=>c>=2).forEach(([t,c]) => {
+    redFlags.push('🚛 <b>' + t + '</b> → ' + c + ' breakdowns!');
+  });
+
+  // Drivers with accidents
+  const driverAccidents = {};
+  d.filter(x=>x.type==='Accident').forEach(a => {
+    const dr = a.driver || '—';
+    driverAccidents[dr] = (driverAccidents[dr]||0) + 1;
+  });
+  Object.entries(driverAccidents).forEach(([dr,c]) => {
+    redFlags.push('👤 <b>' + dr + '</b> → ' + c + ' accident' + (c>1?'s':''));
+  });
+
+  if (redFlags.length) {
+    html += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:11px 13px;margin-bottom:8px;">'
+      + '<div style="font-weight:700;font-size:12px;color:var(--red);margin-bottom:6px;">🚨 RED FLAGS</div>'
+      + '<div style="font-size:11px;color:var(--text);line-height:1.8;">' + redFlags.join('<br>') + '</div>'
+      + '</div>';
+  }
+
+  // ── 2. TOP PROBLEM TRUCKS (by total issues) ──
+  const truckIssues = {};
+  d.filter(x=>['Breakdown','Accident','Maintenance','Workshop'].includes(x.type)).forEach(x => {
+    const t = x.truck || '—';
+    truckIssues[t] = (truckIssues[t]||0) + 1;
+  });
+  const topTrucks = Object.entries(truckIssues).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if (topTrucks.length) {
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px;">'
+      + '<div style="font-weight:700;font-size:12px;color:#fb923c;margin-bottom:8px;">🚛 TOP PROBLEM TRUCKS</div>';
+    topTrucks.forEach(([t,c],i) => {
+      const medal = ['🥇','🥈','🥉','4.','5.'][i];
+      const barW = Math.round((c / topTrucks[0][1]) * 100);
+      html += '<div style="margin-bottom:6px;">'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">'
+        + '<span style="color:var(--text);">' + medal + ' ' + t + '</span>'
+        + '<span style="color:#fb923c;font-weight:700;">' + c + ' issues</span></div>'
+        + '<div style="height:5px;background:var(--bg);border-radius:3px;overflow:hidden;">'
+        + '<div style="height:100%;width:' + barW + '%;background:#fb923c;border-radius:3px;"></div></div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  // ── 3. TIRE BRAND VALUE (durability comparison) ──
+  const tireData = d.filter(x=>x.type==='Tire');
+  if (tireData.length) {
+    const brandMonths = {};
+    tireData.forEach(t => {
+      // oldBrand + oldMonths from named fields or row
+      const brand = t.row && t.row[9] ? t.row[9] : null;
+      const months = t.row && t.row[10] ? parseFloat(t.row[10]) : null;
+      if (brand && months && !isNaN(months)) {
+        if (!brandMonths[brand]) brandMonths[brand] = { total:0, count:0 };
+        brandMonths[brand].total += months;
+        brandMonths[brand].count++;
+      }
+    });
+    const brandAvg = Object.entries(brandMonths)
+      .map(([b,info]) => [b, (info.total/info.count).toFixed(1)])
+      .sort((a,b)=>b[1]-a[1]);
+    if (brandAvg.length) {
+      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px;">'
+        + '<div style="font-weight:700;font-size:12px;color:#22d3ee;margin-bottom:8px;">🛞 TIRE BRAND VALUE (avg life)</div>';
+      brandAvg.forEach(([b,m],i) => {
+        const star = i===0 ? ' ⭐ best' : '';
+        html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">'
+          + '<span style="color:var(--text);">' + b + star + '</span>'
+          + '<span style="color:#22d3ee;font-weight:700;">' + m + ' months</span></div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // ── 4. STANDARD ALERTS (breakdown/accident lists) ──
   const alerts = [];
   const bds = d.filter(x=>x.type==='Breakdown');
   if(bds.length) alerts.push({t:'red',icon:'🚨',title:bds.length+' Breakdown(s)',
@@ -5171,14 +5260,12 @@ function renderDashAlerts() {
   const acs = d.filter(x=>x.type==='Accident');
   if(acs.length) alerts.push({t:'red',icon:'💥',title:acs.length+' Accident(s)',
     detail:acs.slice(0,3).map(a=>'🚛 '+a.truck+' · '+a.proj).join('<br>')});
-  const ors = d.filter(x=>x.type==='Outside');
-  if(ors.length) alerts.push({t:'warn',icon:'🏗️',title:ors.length+' Outside Repair(s)',
-    detail:ors.slice(0,3).map(o=>'🚛 '+o.truck+' · '+o.proj).join('<br>')});
-  if(!histData.length) alerts.push({t:'warn',icon:'📭',title:'No data yet',detail:'Forms submit karo — data yahan aayega'});
-  else if(!d.length) alerts.push({t:'warn',icon:'🔍',title:'Is period mein koi record nahi',detail:'Doosra filter chunna'});
-  else if(!alerts.length) alerts.push({t:'ok',icon:'✅',title:'All clear',detail:'Is period mein sab theek hai ✅'});
 
-  el.innerHTML = alerts.map(a=>`
+  if(!histData.length) alerts.push({t:'warn',icon:'📭',title:'No data yet',detail:'Submit forms — data will appear here'});
+  else if(!d.length) alerts.push({t:'warn',icon:'🔍',title:'No records in this period',detail:'Try another filter'});
+  else if(!html && !alerts.length) alerts.push({t:'ok',icon:'✅',title:'All clear',detail:'Everything looks good this period ✅'});
+
+  html += alerts.map(a=>`
     <div style="background:${a.t==='red'?'rgba(239,68,68,.08)':a.t==='warn'?'rgba(245,158,11,.07)':'rgba(16,185,129,.06)'};
       border:1px solid ${a.t==='red'?'rgba(239,68,68,.25)':a.t==='warn'?'rgba(245,158,11,.25)':'rgba(16,185,129,.2)'};
       border-radius:8px;padding:9px 12px;margin-bottom:6px;display:flex;gap:9px;align-items:flex-start;">
@@ -5188,6 +5275,8 @@ function renderDashAlerts() {
         <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5;">${a.detail}</div>
       </div>
     </div>`).join('');
+
+  el.innerHTML = html;
 }
 
 function openProjDetail(proj) {
@@ -5412,18 +5501,22 @@ function getFilteredReportData() {
 // Get group key for an entry based on selected grouping
 function getReportGroupKey(entry) {
   if (reportGroup === 'driver') {
-    // Only driver-related entries
+    // Driver-related entries (driver submits these)
     if (['Checklist','Maintenance','Breakdown','Accident'].includes(entry.type)) {
       return entry.driver || '—';
     }
     return null;
   }
   if (reportGroup === 'foreman') {
-    if (entry.type === 'Workshop') return entry.driver || entry.row?.[5] || '—'; // mechanic field
+    // Workshop entries (foreman handles)
+    if (entry.type === 'Workshop') return entry.driver || entry.truck || '—';
     return null;
   }
   if (reportGroup === 'tireman') {
-    if (entry.type === 'TireRequest' || entry.type === 'Tire') return entry.driver || entry.truck || '—';
+    // All tire-related entries (tireman handles): Tire, Puncture, Air
+    if (['TireRequest','Tire','PunctureRepair','AirPressure'].includes(entry.type)) {
+      return entry.truck || entry.driver || '—';
+    }
     return null;
   }
   if (reportGroup === 'truck')   return entry.truck || '—';
@@ -5670,7 +5763,7 @@ function renderReportGroupList() {
 
   el.innerHTML = sortedGroups.map(([name, info]) => {
     const typeBadges = Object.entries(info.types).map(([t,c]) => {
-      const colors = {Checklist:'#10b981',Maintenance:'#3b82f6',Breakdown:'#ef4444',Accident:'#f59e0b',Workshop:'#a78bfa',TireRequest:'#fb923c',Tire:'#fb923c',OutsideRepair:'#06b6d4',JobCard:'#06b6d4'};
+      const colors = {Checklist:'#10b981',Maintenance:'#06b6d4',Breakdown:'#ef4444',Accident:'#f59e0b',Workshop:'#a78bfa',TireRequest:'#fb923c',Tire:'#fb923c',PunctureRepair:'#eab308',AirPressure:'#22d3ee',OutsideRepair:'#10b981',Outside:'#10b981',JobCard:'#10b981'};
       const c2 = colors[t] || '#94a3b8';
       return '<span style="background:' + c2 + '22;color:' + c2 + ';padding:2px 6px;border-radius:8px;font-size:9px;font-weight:600;margin-right:3px;">' + t + ': ' + c + '</span>';
     }).join('');
