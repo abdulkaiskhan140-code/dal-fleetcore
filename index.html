@@ -5387,15 +5387,54 @@ function dashExportProj() {
   if(!dashProj) return;
   doDashExport(dashFiltered.filter(x=>x.proj===dashProj),'DAL_'+dashProj);
 }
+// Full column headers per type (matches row data order)
+const EXPORT_HEADERS = {
+  'Checklist':  ['Project','Truck','Trailer','Driver','TripType','KM_Start','KM_End','Fuel','Defects','Remarks'],
+  'Maintenance':['Project','Truck','Trailer','Driver','Type','Priority','Description','KM'],
+  'Breakdown':  ['Project','Truck','Trailer','Driver','Type','Location','Blocking','Description','Latitude','Longitude','MapLink'],
+  'Accident':   ['Project','Truck','Trailer','Driver','Type','Location','NajmCase','NajmLink','OtherVehicle','Injury','Description','Latitude','Longitude','MapLink'],
+  'Workshop':   ['Project','Truck','Trailer','Driver','Action','Mechanic','JobType','Description','InspectionResult'],
+  'Outside':    ['Project','Truck','Trailer','Driver','JobCard','SendDate','Vendor','RepairType','Cost','ExpectedReturn'],
+  'Tire':       ['Project','Truck','Trailer','Driver','Date','KM','Position','OldSerial','OldSize','OldBrand','OldMonths','NewSerial','NewSize','NewBrand','Reason','Location','RequestedBy','Notes'],
+  'PunctureRepair':['Project','Truck','Trailer','Driver','Date','KM','Position','PunctureType','RepairMethod','RepairStatus','Cost','Location','Notes'],
+  'AirPressure':['Project','Truck','Trailer','Driver','Date','KM','PSI_FL','PSI_FR','PSI_RLI','PSI_RLO','PSI_RRI','PSI_RRO','PSI_A1L','PSI_A1R','PSI_A2L','PSI_A2R','PSI_A3L','PSI_A3R','Action','Notes']
+};
+
 function doDashExport(data, name) {
-  if(!data.length){showToast('❌ No data',true);return;}
-  const rows=[['Time','Type','Project','Truck','Trailer','Driver','Synced']];
-  data.forEach(h=>rows.push([h.time,h.type,h.proj,h.truck,h.trailer,h.driver,h.remote?'Yes':'No']));
-  const csv=rows.map(r=>r.map(c=>'"'+(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=name+'_'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click(); showToast('📥 Exported!');
+  if(!data.length){showToast('\u274c No data',true);return;}
+
+  // Full detail export - every field from each entry
+  const allTypes = [...new Set(data.map(h => h.type))];
+  const detailCols = [];
+  allTypes.forEach(t => {
+    (EXPORT_HEADERS[t] || []).forEach(col => {
+      if (!detailCols.includes(col)) detailCols.push(col);
+    });
+  });
+
+  const header = ['Time','Type', ...detailCols, 'Synced'];
+  const rows = [header];
+
+  data.forEach(h => {
+    const r = h.row || [];
+    const hdrs = EXPORT_HEADERS[h.type] || [];
+    const rowMap = {};
+    hdrs.forEach((col, i) => { rowMap[col] = r[i] !== undefined ? r[i] : ''; });
+    const line = [
+      h.time || '',
+      h.type || '',
+      ...detailCols.map(col => rowMap[col] !== undefined ? rowMap[col] : ''),
+      h.remote ? 'Yes' : 'No'
+    ];
+    rows.push(line);
+  });
+
+  const csv = rows.map(r => r.map(c => '"' + String(c==null?'':c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = name + '_FULL_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  showToast('\ud83d\udce5 Full detail export ready! \u00b7 \u0645\u0643\u062a\u0645\u0644');
 }
 
 // ════════════════════════════════════════════════════════════
