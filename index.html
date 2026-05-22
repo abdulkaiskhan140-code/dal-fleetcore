@@ -17,13 +17,13 @@
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js');
     const {
       getFirestore, collection, addDoc, getDocs, query,
-      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc, updateDoc
     } = await import('https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js');
 
     window.dalFB = {
       initializeApp, getApps,
       getFirestore, collection, addDoc, getDocs, query,
-      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc,
+      orderBy, limit, onSnapshot, serverTimestamp, where, Timestamp, doc, setDoc, updateDoc,
       ready: true
     };
     console.log('[Firebase] ✅ SDK loaded successfully');
@@ -1796,6 +1796,11 @@
             <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
               margin-bottom:8px;font-family:'IBM Plex Mono',monospace;">💡 Owner Insights</div>
             <div id="dashAlerts"><div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">Loading...</div></div>
+
+            <!-- 🔔 STATUS WORKFLOW — Manager VIEW ONLY (foreman updates) -->
+            <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
+              margin:14px 0 8px;font-family:'IBM Plex Mono',monospace;">🔔 Active Items — Status (View Only)</div>
+            <div id="dashStatusList"><div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">Loading...</div></div>
           </div>
 
           <!-- ════ REPORTS SECTION ════ -->
@@ -2217,6 +2222,29 @@
             <span class="btxt">🏭 Submit Workshop Entry · حفظ</span>
             <span class="spn"><span class="spinner"></span></span>
           </button>
+        </div>
+      </div>
+
+      <!-- 🔄 FOREMAN STATUS FOLLOW-UP — update active trucks -->
+      <div class="card" style="border-color:rgba(59,130,246,.35);margin-top:12px;">
+        <div class="ch" style="background:rgba(59,130,246,.08);">
+          <div class="ch-ico">🔄</div>
+          <div>
+            <div class="ch-ttl" style="color:#3b82f6;">Truck Status Follow-Up · حالة الشاحنة</div>
+            <div class="ch-sub">Tap to update · حالت اپ ڈیٹ کریں</div>
+          </div>
+        </div>
+        <div class="cb">
+          <!-- Filter buttons -->
+          <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+            <button onclick="setForemanStatusFilter('active',this)" class="fs-filter fs-sel"
+              style="flex:1;min-width:70px;background:var(--accent);color:#000;border:none;border-radius:7px;padding:7px 5px;font-size:10px;font-weight:700;cursor:pointer;">🔴 Active</button>
+            <button onclick="setForemanStatusFilter('all',this)" class="fs-filter"
+              style="flex:1;min-width:70px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 5px;font-size:10px;font-weight:700;cursor:pointer;">📋 All</button>
+            <button onclick="refreshForemanStatus()" 
+              style="background:var(--bg);border:1.5px solid var(--border);color:var(--accent);border-radius:7px;padding:7px 10px;font-size:10px;font-weight:700;cursor:pointer;">🔄</button>
+          </div>
+          <div id="foremanStatusList"><div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">Loading active trucks...</div></div>
         </div>
       </div>
     </div>
@@ -3489,6 +3517,23 @@ const dalCloud = {
     }
   },
 
+  // Update entry status (workflow: Pending → In Progress → Done)
+  async updateStatus(docId, newStatus) {
+    if (!this.enabled || !this.db) return { ok:false, reason:'not-enabled' };
+    try {
+      const fb = window.dalFB;
+      const docRef = fb.doc(this.db, 'entries', docId);
+      await fb.updateDoc(docRef, {
+        status: newStatus,
+        statusUpdatedAt: new Date().toISOString()
+      });
+      return { ok:true };
+    } catch (e) {
+      console.warn('[dalCloud] Status update error:', e);
+      return { ok:false, reason: e.message };
+    }
+  },
+
   // Load recent entries from Firestore
   async loadEntries(maxN) {
     if (!this.enabled || !this.db) return [];
@@ -3665,6 +3710,10 @@ function switchForm(id, tab) {
   }
   if (id === 'adm' && typeof admRenderAll === 'function') {
     setTimeout(admRenderAll, 30);
+  }
+  // Foreman workshop tab — refresh status follow-up list
+  if (id === 'ws' && typeof renderForemanStatus === 'function') {
+    setTimeout(renderForemanStatus, 30);
   }
 }
 
@@ -4877,6 +4926,7 @@ function startCloudSync() {
       merged.push({
         id: c.id,
         cloudId: c.id,
+        docId: c.docId || c.id,
         type: c.sheet,
         sheet: c.sheet,
         icon: meta.icon || '📄',
@@ -4885,6 +4935,7 @@ function startCloudSync() {
         trailer: meta.trailer || '—',
         driver: meta.driver || '—',
         time: meta.timestamp || c.clientTime || '',
+        status: c.status || '—',
         remote: true,
         row: c.row || []
       });
@@ -4909,6 +4960,7 @@ function refreshDashboard() {
   applyDashFilter();
   renderDashStats();
   renderDashAlerts();
+  if (typeof renderStatusList === 'function') renderStatusList();
   const el = document.getElementById('dashLastUpdate');
   if(el) {
     const cloudIcon = dalCloud.enabled ? ' ☁️' : '';
@@ -5278,6 +5330,215 @@ function renderDashAlerts() {
     </div>`).join('');
 
   el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+// 🔔 STATUS WORKFLOW — Manager updates Pending → In Progress → Done
+// ════════════════════════════════════════════════════════════
+const STATUS_FLOW = {
+  // type → ordered status stages (used for default + cycle)
+  Breakdown:   ['Active', 'In Progress', 'Waiting Parts', 'On Hold', 'Resolved'],
+  Accident:    ['Reported', 'In Progress', 'Waiting', 'On Hold', 'Closed'],
+  Maintenance: ['Pending', 'In Progress', 'Waiting Parts', 'On Hold', 'Done'],
+  Workshop:    ['In Progress', 'Waiting Parts', 'On Hold', 'Completed'],
+  Outside:     ['Sent Out', 'In Repair', 'Waiting', 'On Hold', 'Returned']
+};
+
+// 🌐 UNIVERSAL status list — shown in EVERY dropdown (foreman full control)
+const UNIVERSAL_STATUS = [
+  'In Progress',
+  'Waiting Parts',
+  'On Hold',
+  'Sent Outside',
+  'In Repair',
+  'Completed',
+  'Returned',
+  'Resolved',
+  'Closed',
+  'Cancelled'
+];
+
+const STATUS_COLORS = {
+  'Active':'#ef4444','Reported':'#ef4444','Pending':'#f59e0b','Sent Out':'#f59e0b','Sent Outside':'#fb923c',
+  'In Progress':'#3b82f6','In Repair':'#3b82f6','On Hold':'#a78bfa',
+  'Waiting':'#eab308','Waiting Parts':'#eab308',
+  'Resolved':'#10b981','Closed':'#10b981','Done':'#10b981','Completed':'#10b981','Returned':'#10b981',
+  'Cancelled':'#94a3b8'
+};
+
+function renderStatusList() {
+  const el = document.getElementById('dashStatusList');
+  if (!el) return;
+  const d = dashFiltered;
+
+  // Only actionable types
+  const actionable = d.filter(x => ['Breakdown','Accident','Maintenance','Workshop','Outside'].includes(x.type));
+
+  if (!actionable.length) {
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">No active items in this period ✅</div>';
+    return;
+  }
+
+  // Sort: not-done first
+  const doneStatuses = ['Resolved','Closed','Done','Completed','Returned','Cancelled'];
+  actionable.sort((a,b) => {
+    const aDone = doneStatuses.includes(a.status) ? 1 : 0;
+    const bDone = doneStatuses.includes(b.status) ? 1 : 0;
+    return aDone - bDone;
+  });
+
+  el.innerHTML = actionable.map(h => {
+    const status = h.status && h.status !== '—' ? h.status : (STATUS_FLOW[h.type] ? STATUS_FLOW[h.type][0] : 'Pending');
+    const color = STATUS_COLORS[status] || '#94a3b8';
+    const isDone = doneStatuses.includes(status);
+
+    // MANAGER = READ-ONLY (no update button, just shows status badge)
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px;' + (isDone?'opacity:0.6;':'') + '">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+      +   '<div style="flex:1;min-width:0;">'
+      +     '<div style="font-size:11px;font-weight:700;color:var(--text);">' + (h.icon||'📄') + ' ' + h.type + ' · ' + h.truck + '</div>'
+      +     '<div style="font-size:9px;color:var(--muted);margin-top:1px;">' + h.proj + ' · ' + h.driver + '</div>'
+      +   '</div>'
+      +   '<span style="background:' + color + '22;color:' + color + ';border-radius:7px;padding:5px 10px;font-size:10px;font-weight:700;white-space:nowrap;">' + status + (isDone?' ✓':'') + '</span>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// Cycle to next status stage (kept for compatibility)
+async function cycleStatus(cloudId, type, currentStatus) {
+  const flow = STATUS_FLOW[type] || ['Pending','In Progress','Done'];
+  let idx = flow.indexOf(currentStatus);
+  if (idx === -1) idx = 0;
+  const nextIdx = (idx + 1) % flow.length;
+  const nextStatus = flow[nextIdx];
+
+  if (!confirm('Change status?\n\n' + currentStatus + ' → ' + nextStatus)) return;
+
+  showToast('🔄 Updating status...');
+  const res = await dalCloud.updateStatus(cloudId, nextStatus);
+
+  if (res.ok) {
+    const entry = histData.find(h => (h.docId === cloudId || h.cloudId === cloudId));
+    if (entry) entry.status = nextStatus;
+    showToast('✅ Status: ' + nextStatus);
+    renderStatusList();
+    if (typeof renderForemanStatus === 'function') renderForemanStatus();
+  } else {
+    showToast('❌ Update failed: ' + (res.reason||'error'), true);
+  }
+}
+
+// Set status directly from dropdown (foreman picks any status)
+async function setStatus(selectEl, cloudId) {
+  const newStatus = selectEl.value;
+  if (!newStatus) return;
+
+  showToast('🔄 Updating...');
+  const res = await dalCloud.updateStatus(cloudId, newStatus);
+
+  if (res.ok) {
+    const entry = histData.find(h => (h.docId === cloudId || h.cloudId === cloudId));
+    if (entry) entry.status = newStatus;
+    showToast('✅ Status: ' + newStatus);
+    if (typeof renderForemanStatus === 'function') renderForemanStatus();
+    if (typeof renderStatusList === 'function') renderStatusList();
+  } else {
+    showToast('❌ Update failed: ' + (res.reason||'error'), true);
+    if (typeof renderForemanStatus === 'function') renderForemanStatus(); // revert dropdown
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// 🔄 FOREMAN STATUS FOLLOW-UP — foreman updates truck status
+// ════════════════════════════════════════════════════════════
+let foremanStatusFilter = 'active';
+
+function setForemanStatusFilter(filter, btn) {
+  foremanStatusFilter = filter;
+  document.querySelectorAll('.fs-filter').forEach(b => {
+    b.style.background = 'var(--bg)';
+    b.style.color = 'var(--muted)';
+    b.style.border = '1.5px solid var(--border)';
+    b.classList.remove('fs-sel');
+  });
+  if (btn) {
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#000';
+    btn.style.border = 'none';
+    btn.classList.add('fs-sel');
+  }
+  renderForemanStatus();
+}
+
+function refreshForemanStatus() {
+  renderForemanStatus();
+  showToast('🔄 Refreshed');
+}
+
+function renderForemanStatus() {
+  const el = document.getElementById('foremanStatusList');
+  if (!el) return;
+
+  const doneStatuses = ['Resolved','Closed','Done','Completed','Returned','Cancelled'];
+
+  // All actionable entries from histData (foreman follows up workshop, breakdown, outside, etc.)
+  let items = histData.filter(x => ['Breakdown','Accident','Maintenance','Workshop','Outside'].includes(x.type));
+
+  // Filter active vs all
+  if (foremanStatusFilter === 'active') {
+    items = items.filter(x => {
+      const st = x.status && x.status !== '—' ? x.status : (STATUS_FLOW[x.type] ? STATUS_FLOW[x.type][0] : 'Pending');
+      return !doneStatuses.includes(st);
+    });
+  }
+
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">' 
+      + (foremanStatusFilter === 'active' ? 'No active trucks ✅ All done!' : 'No records yet') + '</div>';
+    return;
+  }
+
+  // Sort: active first
+  items.sort((a,b) => {
+    const aDone = doneStatuses.includes(a.status) ? 1 : 0;
+    const bDone = doneStatuses.includes(b.status) ? 1 : 0;
+    return aDone - bDone;
+  });
+
+  el.innerHTML = items.map(h => {
+    const cloudId = h.docId || h.cloudId || '';
+    const status = h.status && h.status !== '—' ? h.status : (STATUS_FLOW[h.type] ? STATUS_FLOW[h.type][0] : 'Pending');
+    const color = STATUS_COLORS[status] || '#94a3b8';
+    const isDone = doneStatuses.includes(status);
+    const canUpdate = cloudId && dalCloud.enabled;
+    // Universal list — every truck gets ALL status options
+    let options = [...UNIVERSAL_STATUS];
+    // Make sure current status is in the list (in case it's a type-specific one like 'Active')
+    if (!options.includes(status)) options.unshift(status);
+
+    // Build dropdown options
+    const optHtml = options.map(o =>
+      '<option value="' + o + '"' + (o===status?' selected':'') + '>' + o + '</option>'
+    ).join('');
+
+    return '<div style="background:var(--bg);border:1px solid ' + color + '55;border-radius:8px;padding:10px 11px;margin-bottom:6px;' + (isDone?'opacity:0.6;':'') + '">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;">'
+      +   '<div style="flex:1;min-width:0;">'
+      +     '<div style="font-size:12px;font-weight:700;color:var(--text);">' + (h.icon||'📄') + ' ' + h.type + ' · ' + h.truck + '</div>'
+      +     '<div style="font-size:10px;color:var(--muted);margin-top:2px;">' + h.proj + ' · 👤 ' + h.driver + '</div>'
+      +   '</div>'
+      +   '<span style="background:' + color + '22;color:' + color + ';border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;white-space:nowrap;">' + status + (isDone?' ✓':'') + '</span>'
+      + '</div>'
+      + (canUpdate
+          ? '<select onchange="setStatus(this,\'' + cloudId + '\')" '
+            + 'style="width:100%;background:var(--surface);border:1.5px solid ' + color + ';color:var(--text);'
+            + 'border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">'
+            + optHtml
+            + '</select>'
+          : '<div style="font-size:9px;color:var(--muted);text-align:center;padding:4px;">⚠️ Old entry — cannot update</div>')
+      + '</div>';
+  }).join('');
 }
 
 function openProjDetail(proj) {
