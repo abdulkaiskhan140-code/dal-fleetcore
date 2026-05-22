@@ -1835,7 +1835,12 @@
                 <button class="rep-group" onclick="setReportGroup('project',this)" style="flex:1;min-width:60px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:7px;padding:7px 6px;font-size:10px;font-weight:700;cursor:pointer;">📦 Project</button>
               </div>
 
+              <!-- Detailed Group List — RIGHT AFTER buttons for instant feedback -->
+              <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;" id="reportGroupLabel">👤 By Driver</div>
+              <div id="reportGroupList" style="margin-bottom:14px;"></div>
+
               <!-- Summary Stats Cards -->
+              <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📊 Totals (all types)</div>
               <div id="reportStats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;"></div>
 
               <!-- Daily Trend Chart -->
@@ -1853,10 +1858,6 @@
                   <canvas id="reportTypeChart"></canvas>
                 </div>
               </div>
-
-              <!-- Detailed Group List -->
-              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;" id="reportGroupLabel">👤 By Driver</div>
-              <div id="reportGroupList" style="margin-bottom:10px;"></div>
 
               <!-- Export Buttons -->
               <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px;margin-bottom:6px;">
